@@ -12,9 +12,10 @@
 
 #define MAX_ARGS 100
 
-/* iFunction prototypes */
+/* Function prototypes */
 void execute_command(char **args, char **envp);
 char **parse_input(char *input);
 char *search_path(const char *command);
+void execute_exit(char **args);
 
 #endif /* MAIN_H */

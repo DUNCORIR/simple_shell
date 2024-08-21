@@ -29,15 +29,13 @@ void execute_command(char *input)
 		argv[i++] = token;
 		token = strtok(NULL, "");
 	}
-	/* NULL-terminating argument vector */
-	argv[i] = NULL;
-	
+	argv[i] = NULL; /* NULL-terminating argument vector */
+
 	if (access(argv[0], X_OK) != 0)
 	{
 		fprintf(stderr, "Command not found: %s\n", argv[0]);
 		return;
 	}
-
 	pid = fork();
 
 	if (pid == -1)/*childs process */
@@ -47,8 +45,7 @@ void execute_command(char *input)
 	}
 	else if (pid == 0)
 	{
-		/* Execute the command */
-		if (execve(argv[0], argv, NULL)== -1)
+		if (execve(argv[0], argv, NULL) == -1)/* Execute command */
 		{
 			perror("execve");
 			exit(EXIT_FAILURE);

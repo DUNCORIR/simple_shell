@@ -39,7 +39,7 @@ int main(void)
 		{
 			free(args[i]);
 		}
-		
+
 		free(args);
 	}
 	free(input);
@@ -48,10 +48,12 @@ int main(void)
 /**
  * parse_input - Parses input string into an array of arguments.
  * @input: input string from user.
- * @args: array to store parsed arguments.
  *
  * Description: tokenizes input string using spaces as delimiters
  * and store each token in args array.
+ *
+ * Return: A pointer to an array of strings (char **), where each string
+ * is an argument parsed from the input.
  */
 char **parse_input(char *input)
 {
@@ -81,7 +83,7 @@ char **parse_input(char *input)
 
 	}
 	args[i] = NULL; /* Null-terminate array of arguments.*/
-	
+
 	return (args);
 }
 
@@ -108,7 +110,7 @@ void execute_command(char **args, char **envp)
 	}
 
 	printf("Executing: %s\n", cmd_path);
-	
+
 	pid = fork();
 	if (pid == -1)
 	{
@@ -143,29 +145,24 @@ void execute_command(char **args, char **envp)
 char *search_path(const char *command)
 {
 	char *path_env = getenv("PATH");
-	char *path = strdup(path_env); /*Duplicate search path to avoid modifying origninal */
+	char *path = strdup(path_env);/*Duplicate search path */
 	char *cmd_path;
 	char *token;
 	struct stat st;
-	
-	/* checkmif command is an absolute path */
 
+	/* checkmif command is an absolute path */
 	if (command[0] == '/')
 	{
-		if(stat(command, &st) == 0 && (st.st_mode & S_IXUSR))
+		if (stat(command, &st) == 0 && (st.st_mode & S_IXUSR))
 		{
-			return strdup(command); /* Return absolute path */
+			return (strdup(command)); /* Return absolute path */
 		}
 		else
-
 		{
 			return (NULL); /* return if not executable */
 		}
 	}
-
-	/* Duplicate PATH environment to avoid modifying it .*/
-	token = strtok(path, ":");
-
+	token = strtok(path, ":"); /* Duplicate PATH environment */
 	while (token)
 	{
 		/* Allocates memory for full command path */
@@ -182,11 +179,9 @@ char *search_path(const char *command)
 		{
 			return (cmd_path);
 		}
-
 		/* free allocated mem and move to next directory */
 		free(cmd_path);
 		token = strtok(NULL, ":");
 	}
-
 	return (NULL);
 }
