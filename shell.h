@@ -1,5 +1,5 @@
-#ifndef MAIN_H
-#define MAIN_H
+#ifndef SHELL_H
+#define SHELL_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,4 +18,4 @@ char **parse_input(char *input);
 char *search_path(const char *command);
 void execute_exit(char **args);
 
-#endif /* MAIN_H */
+#endif /* SHELL_H */
