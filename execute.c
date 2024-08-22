@@ -13,7 +13,24 @@ void execute_command(char **args, char **envp)
 {
 	char *cmd_path;
 	pid_t pid;
+	
+	if (args[0] == NULL)
+	{
+		return;
+	}
+	if (strcmp(args[0], "exit") == 0)
+	{
+		execute_exit(args);
+		return;
+	}
 
+	else if (strcmp(args[0], "env") == 0)
+	{
+		print_env(envp); /* call function to print environment variable */
+		return;
+	}
+	
+	/* Search for the command in path */
 	cmd_path = search_path(args[0]);
 
 	if (!cmd_path)

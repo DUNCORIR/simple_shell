@@ -18,11 +18,18 @@ void execute_exit(char **args)
 	if (args[1] != NULL)
 	{
 		status = atoi(args[1]);
+
+		if (status == 0 && strcmp(args[1], "0") != 0)
+		{
+			fprintf(stderr, "Invalid exit ststus: %s\n", args[1]);
+			return;
+		}
 	}
 
-	printf("Exiting with ststus: %d\n", status);
+	printf("Exiting with status: %d\n", status);
 
 	free(args);
+
 	/*  Exit the shell with the provided or default status */
 	exit(status);
 }

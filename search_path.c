@@ -19,7 +19,7 @@ char *search_path(const char *command)
         struct stat st;
 
         /* checkmif command is an absolute path */
-        if (command[0] == '/')
+        if (command[0] == '/' || command[0] == '.')
         {
                 if (stat(command, &st) == 0 && (st.st_mode & S_IXUSR))
                 {
@@ -27,9 +27,17 @@ char *search_path(const char *command)
                 }
                 else
                 {
-                        return (NULL); /* return if not executable */
-                }
+		return (NULL); /* return if not executable */
+		}
         }
+	/* Tokenize the PATH environment to avoid modifyin it */
+	path = strdup(path_env);
+	if (!path)
+	{
+		perror("strdup");
+		return (NULL);
+	}
+
         token = strtok(path, ":"); /* Duplicate PATH environment */
         while (token)
         {
@@ -38,6 +46,7 @@ char *search_path(const char *command)
                 if (!cmd_path)
                 {
                         perror("malloc");
+			free(path);
                         return (NULL);
                 }
                 /* Construct full command path */
@@ -45,11 +54,13 @@ char *search_path(const char *command)
                 /* check if command is executable */
                 if (stat(cmd_path, &st) == 0 && (st.st_mode & S_IXUSR))
                 {
-                        return (cmd_path);
+			free(path);/* Free the duplicate */
+                        return (cmd_path); /* Return the command path */
                 }
                 /* free allocated mem and move to next directory */
                 free(cmd_path);
                 token = strtok(NULL, ":");
-        }
+	}
+        free(path);
         return (NULL);
 }

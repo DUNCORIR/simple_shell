@@ -27,7 +27,7 @@ char **parse_input(char *input)
         token = strtok(input, " ");
         while (token != NULL && i < MAX_ARGS - 1)
         {
-                args[i] = strdup(token);
+                args[i] = strdup(token); /* Duplicate token into args array */
                 if (args[i] == NULL)
                 {
                         perror("strdup");
