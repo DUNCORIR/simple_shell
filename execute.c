@@ -1,47 +1,42 @@
 #include "shell.h"
 
 /**
- * execute_command - executes command using execve
- * @args: array of arguments.
+ * handle_builtins - Handles built-in commands like "exit" and "env".
+ * @args: Array of arguments.
  * @envp: The environment vector.
  *
- * The function checks if the command is accessible and executable.
- * forks a new process to execute the command using execve if
- * executable.errpr message if no command found.
+ * Return: 1 if handled, 0 otherwise.
  */
-void execute_command(char **args, char **envp)
+static int handle_builtins(char **args, char **envp)
 {
-	char *cmd_path;
-	pid_t pid;
-	
 	if (args[0] == NULL)
-	{
-		return;
-	}
+		return (0);
+
 	if (strcmp(args[0], "exit") == 0)
 	{
 		execute_exit(args);
-		return;
+		return (1);
 	}
-
-	else if (strcmp(args[0], "env") == 0)
+	if (strcmp(args[0], "env") == 0)
 	{
-		print_env(envp); /* call function to print environment variable */
-		return;
+		print_env(envp); /* call function to print environ variable */
+		return (1);
 	}
-	
-	/* Search for the command in path */
-	cmd_path = search_path(args[0]);
+	return (0);
+}
 
-	if (!cmd_path)
-	{
-		fprintf(stderr, "Command not found: %s\n", args[0]);
-		return;
-	}
+/**
+ * execute_fork - Forks a process and executes the command.
+ * @cmd_path: Full path to the command.
+ * @args: Array of arguments.
+ * @envp: The environment vector.
+ *
+ * Return: Nothing.
+ */
+static void execute_fork(char *cmd_path, char **args, char **envp)
+{
+	pid_t pid = fork();
 
-	printf("Executing: %s\n", cmd_path);
-
-	pid = fork();
 	if (pid == -1)
 	{
 		perror("fork");
@@ -58,6 +53,32 @@ void execute_command(char **args, char **envp)
 	{
 		wait(NULL);
 	}
+}
+
+/**
+ * execute_command - executes command using execve
+ * @args: array of arguments.
+ * @envp: The environment vector.
+ *
+ * The function checks if the command is accessible and executable.
+ * forks a new process to execute the command using execve if
+ * executable.errpr message if no command found.
+ */
+void execute_command(char **args, char **envp)
+{
+	char *cmd_path;
+
+	if (handle_builtins(args, envp))
+		return;
+
+	cmd_path = search_path(args[0]); /* Search for the command in path */
+	if (!cmd_path)
+	{
+		fprintf(stderr, "Command not found: %s\n", args[0]);
+		return;
+	}
+	printf("Executing: %s\n", cmd_path);
+	execute_fork(cmd_path, args, envp);
 
 	free(cmd_path);
 }
