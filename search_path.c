@@ -33,7 +33,7 @@ char *search_path(const char *command)
 	while (token != NULL)
 	{
 		cmd_path = malloc(strlen(token) + strlen(command) + 2);
-		if (!cmd_path == NULL)
+		if (cmd_path == NULL)
 		{
 			perror("malloc");
 			free(path);
