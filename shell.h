@@ -1,6 +1,10 @@
 #ifndef SHELL_H
 #define SHELL_H
 
+
+#define INIT_BUF_SIZE 256        /* Initial buffer size */
+#define STATIC_BUF_SIZE 1024     /* Static buffer size */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -20,5 +24,7 @@ void execute_exit(char **args);
 void print_env(char **envp);
 void execute_command_or_builtin(char **args, char **environ);
 void handle_input(char **input, size_t *len, ssize_t *nread);
+ssize_t custom_getline(char **lineptr, size_t *n);
+char *custom_strdup(const char *str);
 
 #endif /* SHELL_H */

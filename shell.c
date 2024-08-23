@@ -20,6 +20,7 @@ int main(int argc, char **argv)
 	size_t len = 0;
 	ssize_t nread;
 	char **args;
+	extern char **environ;
 
 	(void)argc;
 	(void)argv;
@@ -27,13 +28,20 @@ int main(int argc, char **argv)
 	while (1)
 	{
 		printf("$ "); /* Display prompt */
-		nread = getline(&input, &len, stdin); /* Read input from user. */
-		if (nread == -1) /* Check for end of input (EOF) */
+		fflush(stdout);
+
+		nread = custom_getline(&input, &len);
+		if (nread == -1) /* Read input from user. */
 		{
 			free(input);
 			exit(EXIT_FAILURE); /* Exit normally on EOF */
 		}
-
+		/* Remove newline character if present */
+		if (nread > 0 && input[nread - 1] == '\n')
+		{
+			input[nread - 1] = '\0';
+		}
+		/* Parse the input into arguments */
 		args = parse_input(input);
 		/* Execute command or handle built-in */
 		execute_command_or_builtin(args, environ);
@@ -54,7 +62,7 @@ int main(int argc, char **argv)
  */
 void handle_input(char **input, size_t *len, ssize_t *nread)
 {
-	*nread = getline(input, len, stdin);/* Read input from user */
+	*nread = custom_getline(input, len);/* Read input from user */
 	if (*nread == -1) /* Check for errors or EOF */
 	{
 		if (feof(stdin))
