@@ -2,7 +2,8 @@
 
 /**
  * custom_strtok - Custom implementation of strtok
- * @str: String to tokenize, or NULL to continue tokenizing the previous string.
+ * @str: String to tokenize, or NULL to continue
+ *	 tokenizing the previous string.
  * @delim: The delimiters used to separate tokens
  *
  * Return: A pointer to the next token, or NULL if there are no more tokens
@@ -19,7 +20,7 @@ char *custom_strtok(char *str, const char *delim)
 	char *token;
 	int start = 0;
 	int end = 0;
-	
+
 	/* If new string is given,use it else continue with the previous one */
 	if (str != NULL)
 		saved_str = str;
@@ -31,14 +32,11 @@ char *custom_strtok(char *str, const char *delim)
 	while (saved_str[start] != '\0' && strchr(delim, saved_str[start]) != NULL)
 		start++;
 
-	/* If no more tokens */
-	if (saved_str[start] == '\0')
+	if (saved_str[start] == '\0')  /* If no more tokens */
 	{
 		return (NULL);
 	}
-
-	/* move to end token */
-	end = start;
+	end = start; /* move to end token */
 	while (saved_str[end] != '\0' && strchr(delim, saved_str[end]) == NULL)
 		end++;
 

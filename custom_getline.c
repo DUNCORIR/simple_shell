@@ -9,18 +9,18 @@
 ssize_t custom_getline(char **lineptr, size_t *n)
 {
 	static char buffer[STATIC_BUF_SIZE];
-	static ssize_t buffer_pos = 0, buffer_size = 0;
+	static ssize_t buffer_pos, buffer_size;
 	ssize_t num_read = 0;
 	char *new_lineptr, c = 0;
 
 	if (!lineptr || !n) /* Validate input */
-	return (-1);
+		return (-1);
 	if (!*lineptr) /* Allocate memory if needed */
 	{
-	*lineptr = malloc(INIT_BUF_SIZE);
-	if (!*lineptr)
-	return (-1);
-	*n = INIT_BUF_SIZE;
+		*lineptr = malloc(INIT_BUF_SIZE);
+		if (!*lineptr)
+			return (-1);
+		*n = INIT_BUF_SIZE;
 	}
 	while (1)
 	{
@@ -29,7 +29,7 @@ ssize_t custom_getline(char **lineptr, size_t *n)
 			buffer_size = read(STDIN_FILENO, buffer, STATIC_BUF_SIZE);
 			buffer_pos = 0;
 			if (buffer_size <= 0) /* EOF or error */
-                		return (buffer_size == 0 && num_read > 0) ? num_read : -1;
+				return ((buffer_size == 0 && num_read > 0) ? num_read : -1);
 		}
 		c = buffer[buffer_pos++]; /* Get next character */
 		if (num_read >= (ssize_t)(*n - 1)) /* Resize if buffer full */

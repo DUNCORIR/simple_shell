@@ -1,6 +1,7 @@
 #ifndef SHELL_H
 #define SHELL_H
 
+extern char **environ;
 
 #define INIT_BUF_SIZE 256        /* Initial buffer size */
 #define STATIC_BUF_SIZE 1024     /* Static buffer size */
