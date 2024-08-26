@@ -12,7 +12,7 @@
 char *search_path(const char *command)
 {
 	char *path_env = getenv("PATH");
-	char *path = strdup(path_env);/*Duplicate search path */
+	char *path = custom_strdup(path_env);/*Duplicate search path */
 	char *cmd_path;
 	char *token;
 	struct stat st;
@@ -21,7 +21,7 @@ char *search_path(const char *command)
 	{
 		if (stat(command, &st) == 0 && (st.st_mode & S_IXUSR))
 		{
-			return (strdup(command)); /* Return absolute path */
+			return (custom_strdup(command)); /* Return absolute path */
 		}
 		else
 		{
@@ -29,7 +29,7 @@ char *search_path(const char *command)
 		}
 	}
 
-	token = strtok(path, ":"); /* Duplicate PATH environment */
+	token = custom_strtok(path, ":"); /* Duplicate PATH environment */
 	while (token != NULL)
 	{
 		cmd_path = malloc(strlen(token) + strlen(command) + 2);
@@ -46,7 +46,7 @@ char *search_path(const char *command)
 			return (cmd_path); /* Return the command path */
 		}
 		free(cmd_path);/* free allocated mem and move to next directory */
-		token = strtok(NULL, ":");
+		token = custom_strtok(NULL, ":");
 	}
 	free(path);
 	return (NULL);

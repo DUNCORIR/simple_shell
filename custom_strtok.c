@@ -18,13 +18,13 @@ char *custom_strtok(char *str, const char *delim)
 	static char *saved_str;
 	char *token;
 	int start = 0;
-	int end;
+	int end = 0;
 	
 	/* If new string is given,use it else continue with the previous one */
 	if (str != NULL)
 		saved_str = str;
 	/* If there's no string left to tokenize, return NULL */
-	if (saved_str == NULL)
+	if (saved_str == NULL || *saved_str == '\0')
 		return (NULL);
 
 	/* Skip leading delimiters */
@@ -40,21 +40,21 @@ char *custom_strtok(char *str, const char *delim)
 	/* move to end token */
 	end = start;
 	while (saved_str[end] != '\0' && strchr(delim, saved_str[end]) == NULL)
-	end++;
+		end++;
 
 	/* Null terminate the token */
 	if (saved_str[end] != '\0')
 	{
 		saved_str[end] = '\0'; /* End of the token */
-		saved_str = NULL; /*No more tokens left */
+		token = saved_str + start;
+		saved_str = saved_str + end + 1; /*Move to the next token */
 	}
 	else
 	{
-		saved_str[end] = '\0'; /* Null terminate the token */
-		saved_str = saved_str + end + 1; /*Move to the next token */
+		token = saved_str + start;
+		saved_str = NULL; /* No more tokens left */
 	}
 
 	/*  Return the current token */
-	token = saved_str + start;
 	return (token);
 }

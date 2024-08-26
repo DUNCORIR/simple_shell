@@ -26,5 +26,6 @@ void execute_command_or_builtin(char **args, char **environ);
 void handle_input(char **input, size_t *len, ssize_t *nread);
 ssize_t custom_getline(char **lineptr, size_t *n);
 char *custom_strdup(const char *str);
+char *custom_strtok(char *str, const char *delim);
 
 #endif /* SHELL_H */

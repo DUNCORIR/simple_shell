@@ -16,15 +16,15 @@ char **parse_input(char *input)
 	char **args;
 	char *token;
 
-	/* tokenize input string */
+	/* Allocate memory for argument array  */
 	args = malloc(MAX_ARGS * sizeof(char *));
 	if (args == NULL)
 	{
 		perror("malloc");
-	exit(EXIT_FAILURE);
+		exit(EXIT_FAILURE);
 	}
 
-	token = custom_strdup(input);
+	token = custom_strtok(input, " \t\n"); /* Tokenize based on spaces and tabs */
 	while (token != NULL && i < MAX_ARGS - 1)
 	{
 		args[i] = custom_strdup(token); /* Duplicate token into args array */
@@ -35,7 +35,7 @@ char **parse_input(char *input)
 		}
 
 		i++;
-		token = custom_strdup(NULL);
+		token = custom_strtok(NULL, " \t\n");
 
 	}
 	args[i] = NULL; /* Null-terminate array of arguments.*/
