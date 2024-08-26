@@ -44,10 +44,15 @@ char **parse_input(char *input)
 }
 
 /**
- * strdup_custom - Custom implementation of strdup.
+ * custom_strdup - Custom implementation of strdup.
  * @str: The input string to duplicate.
  *
  * Return: A pointer to the duplicated string, or NULL on failure.
+ *
+ * Description: This function allocates memory and duplicates
+ *	the given string. It returns a pointer to the
+ *	newly allocated string, or NULL if the allocation
+ *	fails.
  */
 char *custom_strdup(const char *str)
 {
