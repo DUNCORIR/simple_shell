@@ -1,8 +1,5 @@
 #include "shell.h"
 
-void handle_input(char **input, size_t *len, ssize_t *nread);
-void execute_command_or_builtin(char **args, char **environ);
-
 /**
  * main - Entry point for simple shell
  * @argc: Argumnet count
@@ -61,6 +58,9 @@ int main(int argc, char **argv)
  */
 void handle_input(char **input, size_t *len, ssize_t *nread)
 {
+	char *equal_sign;
+	char **args;
+
 	*nread = custom_getline(input, len);/* Read input from user */
 	if (*nread == -1) /* Check for errors or EOF */
 	{
@@ -72,6 +72,32 @@ void handle_input(char **input, size_t *len, ssize_t *nread)
 		perror("getline"); /* Print error message if getline fails */
 		exit(EXIT_FAILURE); /* Exit with failure on error */
 	}
+	if (*nread > 0 && (*input)[*nread - 1] == '\n')
+	{
+		(*input)[*nread - 1] = '\0'; /* Replace newline */
+		(*nread)--; /* Adjust length */
+	}
+	equal_sign = strchr(*input, '='); /* Handle environment variable assignment */
+	if (equal_sign != NULL)
+	{
+		char *var = strtok(*input, "="), *val = strtok(NULL, "=");
+
+		if (var && val)
+		{
+			if (setenv(var, val, 1) == -1)
+				perror("setenv"); /* Handle setenv error */
+		}
+		else
+			fprintf(stderr, "Invalid environment variable assignment\n");
+		return; /* Skip command execution */
+	}
+	args = parse_input(*input);
+	if (args[0] != NULL)
+	{
+		handle_builtins(args, environ); /* Handle built-ins */
+		execute_command(args, environ); /* Execute command */
+	}
+	free(args); /* Free argument list */
 }
 
 /**
@@ -95,6 +121,14 @@ void execute_command_or_builtin(char **args, char **environ)
 		else if (strcmp(args[0], "env") == 0)
 		{
 			print_env(environ); /* handle built in function */
+		}
+		else if (strcmp(args[0], "setenv") == 0)
+		{
+			execute_setenv(args); /* Handle setenv built-in function */
+		}
+		else if (strcmp(args[0], "unsetenv") == 0)
+		{
+			execute_unsetenv(args); /*Handle unsetenv built-in function */
 		}
 		else
 		{

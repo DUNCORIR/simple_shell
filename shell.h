@@ -3,6 +3,7 @@
 
 extern char **environ;
 
+#define MAX_ARGS 1024
 #define INIT_BUF_SIZE 256        /* Initial buffer size */
 #define STATIC_BUF_SIZE 1024     /* Static buffer size */
 
@@ -15,7 +16,7 @@ extern char **environ;
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#define MAX_ARGS 100
+#define MAX_ARGS 1024
 
 /* Function prototypes */
 void execute_command(char **args, char **environ);
@@ -28,5 +29,7 @@ void handle_input(char **input, size_t *len, ssize_t *nread);
 ssize_t custom_getline(char **lineptr, size_t *n);
 char *custom_strdup(const char *str);
 char *custom_strtok(char *str, const char *delim);
-
+void execute_setenv(char **args);
+void execute_unsetenv(char **args);
+int handle_builtins(char **args, char **envp);
 #endif /* SHELL_H */

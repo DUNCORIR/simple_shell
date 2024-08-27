@@ -21,7 +21,7 @@ void execute_exit(char **args)
 
 		if (status == 0 && strcmp(args[1], "0") != 0)
 		{
-			fprintf(stderr, "Invalid exit ststus: %s\n", args[1]);
+			fprintf(stderr, "Invalid exit status: %s\n", args[1]);
 			return;
 		}
 	}

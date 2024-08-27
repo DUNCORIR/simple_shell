@@ -30,7 +30,12 @@ char **parse_input(char *input)
 		args[i] = custom_strdup(token); /* Duplicate token into args array */
 		if (args[i] == NULL)
 		{
-			perror("strdup");
+			perror("custom_strdup");
+			while (i > 0)
+			{
+				free(args[--i]); /* Free previous allocated strings */
+			}
+			free(args);
 			exit(EXIT_FAILURE);
 		}
 

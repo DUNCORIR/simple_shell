@@ -7,10 +7,13 @@
  *
  * Return: 1 if handled, 0 otherwise.
  */
-static int handle_builtins(char **args, char **envp)
+int handle_builtins(char **args, char **envp)
 {
 	if (args[0] == NULL)
 		return (0);
+
+	printf("Command: %s\n", args[0]);
+
 
 	if (strcmp(args[0], "exit") == 0)
 	{
@@ -22,6 +25,17 @@ static int handle_builtins(char **args, char **envp)
 		print_env(envp); /* call function to print environ variable */
 		return (1);
 	}
+	if (strcmp(args[0], "setenv") == 0)
+	{
+		execute_setenv(args);
+		return (1);
+	}
+	if (strcmp(args[0], "unsetenv") == 0)
+	{
+		execute_unsetenv(args);
+		return (1);
+	}
+
 	return (0);
 }
 
