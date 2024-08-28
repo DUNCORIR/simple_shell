@@ -1,54 +1,6 @@
 #include "shell.h"
 
 /**
- * parse_input - Parses input string into an array of arguments.
- * @input: input string from user.
- *
- * Description: tokenizes input string using spaces as delimiters
- * and store each token in args array.
- *
- * Return: A pointer to an array of strings (char **), where each string
- * is an argument parsed from the input.
- */
-char **parse_input(char *input)
-{
-	size_t i = 0;
-	char **args;
-	char *token;
-
-	/* Allocate memory for argument array  */
-	args = malloc(MAX_ARGS * sizeof(char *));
-	if (args == NULL)
-	{
-		perror("malloc");
-		exit(EXIT_FAILURE);
-	}
-
-	token = custom_strtok(input, " \t\n"); /* Tokenize based on spaces and tabs */
-	while (token != NULL && i < MAX_ARGS - 1)
-	{
-		args[i] = custom_strdup(token); /* Duplicate token into args array */
-		if (args[i] == NULL)
-		{
-			perror("custom_strdup");
-			while (i > 0)
-			{
-				free(args[--i]); /* Free previous allocated strings */
-			}
-			free(args);
-			exit(EXIT_FAILURE);
-		}
-
-		i++;
-		token = custom_strtok(NULL, " \t\n");
-
-	}
-	args[i] = NULL; /* Null-terminate array of arguments.*/
-
-	return (args);
-}
-
-/**
  * custom_strdup - Custom implementation of strdup.
  * @str: The input string to duplicate.
  *
@@ -109,18 +61,70 @@ char **parse_commands(char *input)
 	token = custom_strtok(input, ";");
 	while (token != NULL)
 	{
-		commands[i] = custom_strdup(token);
-		if (!commands[i])
+		char *subtoken; /* Split further by && and || */
+		subtoken = custom_strtok(token, " \t");
+		while (subtoken != NULL)
 		{
-			while (i > 0) /* Handle memory allocation failure */
-				free(commands[--i]);
+			commands[i] = custom_strdup(subtoken);
+			if (!commands[i])
+			{
+				while (i > 0) /* Handle memory allocation failure */
+					free(commands[--i]);
 			free(commands);
 			return (NULL);
+			}
+			i++;
+			subtoken = custom_strtok(NULL, " \t");
 		}
-
-		i++;
 		token = custom_strtok(NULL, ";");
 	}
 	commands[i] = NULL;
 	return (commands);
+}
+
+/**
+ * parse_input - Parses input string into an array of arguments.
+ * @input: input string from user.
+ *
+ * Description: Tokenizes the input string using spaces, tabs, and newlines
+ * as delimiters, and stores each token in the args array.
+ *
+ * Return: A pointer to an array of strings (char **), where each string
+ * is an argument parsed from the input.
+ */
+char **parse_input(char *input)
+{
+	size_t i = 0;
+	char **args;
+	char *token;
+
+	/* Allocate memory for argument array */
+	args = malloc(MAX_ARGS * sizeof(char *));
+	if (args == NULL)
+	{
+		perror("malloc");
+		exit(EXIT_FAILURE);
+	}
+
+	token = custom_strtok(input, " \t\n"); /* Tokenize based on spaces, tabs, and newlines */
+	while (token != NULL && i < MAX_ARGS - 1)
+	{
+		args[i] = custom_strdup(token); /* Duplicate token into args array */
+		if (args[i] == NULL)
+		{
+			perror("custom_strdup");
+			while (i > 0)
+			{
+				free(args[--i]);/* Free previously allocated strings */
+			}
+			free(args);
+			exit(EXIT_FAILURE);
+		}
+
+		i++;
+		token = custom_strtok(NULL, " \t\n");
+	}
+	args[i] = NULL; /* Null-terminate the array of arguments */
+
+	return (args);
 }
