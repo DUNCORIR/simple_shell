@@ -107,7 +107,7 @@ char **parse_input(char *input)
 		exit(EXIT_FAILURE);
 	}
 	/* Tokenize based on spaces, tabs, and newlines */
-	token = custom_strtok(input," \t\n");
+	token = custom_strtok(input, " \t\n");
 	while (token != NULL && i < MAX_ARGS - 1)
 	{
 		args[i] = custom_strdup(token); /* Duplicate token into args array */
