@@ -1,0 +1,22 @@
+#include "shell.h"
+
+/**
+ * free_alias_list - Frees alias list.
+ *
+ */
+void free_alias_list(void)
+{
+	alias_node *current = alias_list;
+	alias_node *next;
+
+	while (current != NULL)
+	{
+		next = current->next;
+		free(current->name);
+		free(current->value);
+		free(current);
+		current = next;
+	}
+
+	alias_list = NULL;
+}

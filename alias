@@ -1,0 +1,177 @@
+#include "shell.h"
+
+/**
+ * add_alias - Adds or updates an alias.
+ * @name: Alias name.
+ * @value: Alias value.
+ */
+void add_alias(const char *name, const char *value)
+{
+	alias_node *current;
+	alias_node *prev;
+	alias_node *new_alias;
+	char *name_copy;
+	char *value_copy;
+
+	current = alias_list;
+	prev = NULL;
+
+	while (current != NULL)
+	{
+		if (strcmp(current->name, name) == 0)
+		{
+			free(current->value);
+			current->value = custom_strdup(value);
+			return;
+		}
+		prev = current;
+		current = current->next;
+	}
+
+	/* Adds new alias to the list */
+	new_alias = malloc(sizeof(alias_node));
+	if (new_alias == NULL)
+	{
+		perror("malloc");
+		exit(EXIT_FAILURE);
+	}
+	name_copy = custom_strdup(name);
+	value_copy = custom_strdup(value);
+
+	if (name_copy == NULL || value_copy == NULL)
+	{
+		 perror("custom_strdup");
+		 exit(EXIT_FAILURE);
+	}
+
+	new_alias->name = name_copy;
+	new_alias->value = value_copy;
+	new_alias->next = NULL;
+
+	if (prev == NULL)
+	{
+		alias_list = new_alias;
+	}
+	else
+	{
+		prev->next = new_alias;
+	}
+}
+
+/**
+ * remove_alias - Removes an alias.
+ * @name: Alias name to remove.
+ */
+void remove_alias(const char *name) {
+{
+	alias_node *current;
+	alias_node *prev;
+
+	current = alias_list;
+	prev = NULL;
+
+	while (current != NULL)
+	{
+		if (strcmp(current->name, name) == 0)
+		{
+			if (prev == NULL)
+			{
+				alias_list = current->next;
+			}
+			else
+			{
+				prev->next = current->next;
+			}
+			free(current->name);
+			free(current->value);
+			free(current);
+			return;
+		}
+		prev = current;
+		current = current->next;
+	}
+}
+
+
+/**
+ * print_alias - Prints a specific alias
+ * @name: Alias name to print
+ */
+void print_alias(const char *name)
+{
+	alias_node *current;
+
+	current = alias_list;
+
+	while (current != NULL)
+	{
+		if (strcmp(current->name, name) == 0)
+		{
+			printf("%s='%s'\n", current->name, current->value);
+			return;
+		}
+		fprintf(stderr, "alias: %s not found\n", name);
+	}
+}
+
+/**
+ * print_all_aliases - Prints all aliases.
+ */
+void print_all_aliases(void)
+{
+	alias_node *current;
+
+	current = alias_list;
+
+	while (current != NULL)
+	{
+		printf("%s='%s'\n", current->name, current->value);
+		current = current->next;
+	}
+}
+
+/**
+ * handle_alias - Handles the alias built-in command.
+ * @args: Array of arguments for the alias command.
+ */
+void handle_alias(char **args)
+{
+	void(args);
+	int i;
+
+	if (args[1] == NULL)
+	{
+		print_all_aliases();
+	}
+	else
+	{
+		i = 1;
+
+		while (args[i] != NULL)
+		{
+			if (strchr(args[i], '=') != NULL)
+			{
+				char *name;
+				char *value;
+
+				name = custom_strtok(args[i], "=");
+				value = custom_strtok(NULL, "=");
+
+				if (name && value)
+				{
+					add_alias(name, value);
+				}
+				else
+				{
+					fprintf(stderr, "Invalid alias format: %s\n", args[i]);
+				}
+			}
+			else
+			{
+				print_alias(args[i]);
+			}
+
+			i++;
+		}
+	}
+}

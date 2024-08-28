@@ -51,7 +51,7 @@ char **parse_commands(char *input)
 	char **commands;
 	char *token;
 	int i = 0;
-	
+
 	/* Estimate the number of commands and allocate memory */
 	commands = malloc(sizeof(char *) * (strlen(input) / 2 + 2)); /* memory */
 	if (!commands)
@@ -62,6 +62,7 @@ char **parse_commands(char *input)
 	while (token != NULL)
 	{
 		char *subtoken; /* Split further by && and || */
+
 		subtoken = custom_strtok(token, " \t");
 		while (subtoken != NULL)
 		{
@@ -106,7 +107,8 @@ char **parse_input(char *input)
 		exit(EXIT_FAILURE);
 	}
 
-	token = custom_strtok(input, " \t\n"); /* Tokenize based on spaces, tabs, and newlines */
+	token = custom_strtok(input,
+		" \t\n"); /* Tokenize based on spaces, tabs, and newlines */
 	while (token != NULL && i < MAX_ARGS - 1)
 	{
 		args[i] = custom_strdup(token); /* Duplicate token into args array */
@@ -127,4 +129,29 @@ char **parse_input(char *input)
 	args[i] = NULL; /* Null-terminate the array of arguments */
 
 	return (args);
+}
+
+/**
+ * handle_external_command - Handles the execution of external commands.
+ * @args: An array of arguments passed to the command.
+ * @environ: An array of environment variables.
+ * @program_name: The name of the shell program (argv[0]).
+ * @line_number: The line number in the script or input being executed
+ */
+void handle_external_command(char **args, char **environ,
+		char *program_name, int line_number)
+{
+	char *command_path = search_path(args[0]);
+
+	if (command_path != NULL)
+	{
+		args[0] = command_path;
+		execute_command(args, environ, program_name, line_number);
+		free(command_path);
+	}
+	else
+	{
+		fprintf(stderr, "%s: %d: %s: not found\n",
+				program_name, line_number, args[0]);
+	}
 }

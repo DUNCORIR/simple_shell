@@ -4,12 +4,17 @@
  * handle_builtins - Handles built-in commands like "exit" and "env".
  * @args: Array of arguments.
  * @envp: The environment vector.
+ * @program_name: The name of the shell program (for error messages).
+ * @line_number: The line number of the command
+ *		in the input (for error messages).
+ *
  *
  * Return: 1 if handled, 0 otherwise.
  */
-int handle_builtins(char **args, char **envp, char *program_name, int line_number)
+int handle_builtins(char **args, char **envp,
+		char *program_name, int line_number)
 {
-	(void)program_name;  
+	(void)program_name;
 	(void)line_number;
 
 	if (args[0] == NULL)
@@ -68,7 +73,7 @@ int execute_fork(char *cmd_path, char **args, char **envp)
 	{
 		waitpid(pid, &status, 0);
 			if (WIFEXITED(status))
-				return WEXITSTATUS(status);
+				return (WEXITSTATUS(status));
 	}
 	else
 	{
@@ -79,15 +84,22 @@ int execute_fork(char *cmd_path, char **args, char **envp)
 }
 
 /**
- * execute_command - executes command using execve
+ * execute_command - Executes a command.
  * @args: array of arguments.
  * @envp: The environment vector.
+ * @program_name: The name of the
+ *	shell program (for error messages).
+ * @line_number: The line number of the command in
+ *	the input (for error messages).
  *
  * The function checks if the command is accessible and executable.
  * forks a new process to execute the command using execve if
  * executable.errpr message if no command found.
+ *
+ * Return: 0 on success, -1 on error.
  */
-int execute_command(char **args, char **envp, char *program_name, int line_number)
+int execute_command(char **args, char **envp, char *program_name,
+		int line_number)
 {
 	char *cmd_path;
 	int status;
@@ -100,7 +112,8 @@ int execute_command(char **args, char **envp, char *program_name, int line_numbe
 	if (cmd_path == NULL)
 	{
 		/* Format error message like /bin/sh: ./hsh: 1: command: not found */
-		fprintf(stderr, "%s: %d: %s: not found\n", program_name, line_number, args[0]);
+		fprintf(stderr, "%s: %d: %s: not found\n",
+				program_name, line_number, args[0]);
 		return (127);
 	}
 
@@ -110,4 +123,27 @@ int execute_command(char **args, char **envp, char *program_name, int line_numbe
 	free(cmd_path);
 
 	return (status);
+}
+
+/**
+ * execute_command_or_builtin - Executes a command or a shell built-in.
+ * @args: An array of arguments passed to the command.
+ * @environ: An array of environment variables.
+ * @program_name: The name of the shell program (argv[0]).
+ * @line_number: The line number in the script or input being executed.
+ *
+ * Return: An integer status code, 1 if a built-in command was handled,
+ * or 0 otherwise.
+ */
+int execute_command_or_builtin(char **args, char **environ,
+		char *program_name, int line_number)
+{
+	if (args[0] == NULL)
+		return (0);
+
+	if (handle_builtin(args, environ, program_name, line_number))
+		return (1);
+
+	handle_external_command(args, environ, program_name, line_number);
+	return (0);
 }

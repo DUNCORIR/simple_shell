@@ -1,18 +1,15 @@
 #include "shell.h"
 
-void handle_env_assignment(char *input);
-void execute_commands_with_separator(char *input, char **argv, int line_number);
-
 /**
- * main - Entry point for simple shell
- * @argc: Argumnet count
- * @argv: Argument vector.
+ * main - Entry point for the shell program.
+ * @argc: The number of command-line arguments.
+ * @argv: An array of command-line arguments.
  *
  * Description:Initializes the shell, displays the prompt, reads user input,
  *		and executes the corresponding command or built-in function
- *		in a loop until an exit condition is met..
+ *		in a loop until an exit condition is met.
  *
- * Return: Always success.
+ * Return: 0 on success, or another status code on failure
  */
 int main(int argc, char **argv)
 {
@@ -40,20 +37,16 @@ int main(int argc, char **argv)
 			perror("getline"); /* Print error if getline fails */
 			free(input); /* Free memory on error */
 			exit(EXIT_FAILURE); /* Exit with failure on error */
-		}
-		/* Remove newline character if present */
+		} /* Remove newline character if present */
 		if (nread > 0 && input[nread - 1] == '\n')
 		{
 			input[nread - 1] = '\0';
 		}
-		/* Parse the input into arguments */
-		args = parse_input(input);
-		/* Execute command or handle built-in */
+		args = parse_input(input); /* Parse the input into arguments */
 		if (args && args[0] != NULL) /* Ensure args are valid */
 		{
 			execute_command_or_builtin(args, environ, argv[0], line_number);
 		}
-
 		free(args); /* Free parsed arguments */
 		line_number++; /* Increment line number for each input */
 	}
@@ -66,11 +59,14 @@ int main(int argc, char **argv)
  * @input: Pointer to the input string.
  * @len: Pointer to the size of the buffer for getline.
  * @nread: Pointer to store the number of bytes read by getline.
+ * @argv: Array of arguments
+ * @line_number: The current line number being processed.
  *
  * Description: This function reads the user's input using getline,
  * checks for errors, and handles the EOF condition.
  */
-void handle_input(char **input, size_t *len, ssize_t *nread, char **argv, int line_number)
+void handle_input(char **input, size_t *len,
+		ssize_t *nread, char **argv, int line_number)
 {
 	char *equal_sign;
 
@@ -101,6 +97,14 @@ void handle_input(char **input, size_t *len, ssize_t *nread, char **argv, int li
 	execute_commands_with_separator(*input, argv, line_number);
 }
 
+/**
+ * handle_env_assignment - Handles the assignment of environment variables.
+ *  @input: The input string containing the variable and its value.
+ *
+ * Description: This function parses the input string to
+ * separate the variable name and its value.sets the environment
+ * variable using setenv.
+ */
 void handle_env_assignment(char *input)
 {
 	char *var = custom_strtok(input, "=");
@@ -115,6 +119,19 @@ void handle_env_assignment(char *input)
 		fprintf(stderr, "Invalid environment variable assignment\n");
 }
 
+/**
+ * execute_commands_with_separator - Executes commands separated by ';'.
+ * @input: The input string containing commands separated by ';'.
+ * @argv: The argument vector of the shell.
+ * @line_number: The current line number being executed.
+ *
+ * Description: This function splits the input string into
+ * individual commands based on the command separator ';'.
+ * It then parses and executes each command.
+ * Any errors during parsing or execution are reported.
+ *
+ */
+
 void execute_commands_with_separator(char *input, char **argv, int line_number)
 {
 	char **commands = parse_commands(input);
@@ -126,6 +143,7 @@ void execute_commands_with_separator(char *input, char **argv, int line_number)
 		for (i = 0; commands[i]; i++)
 		{
 			char **args = parse_input(commands[i]);
+
 			if (args)
 			{
 				execute_command_or_builtin(args, environ, argv[0], line_number);
@@ -138,60 +156,45 @@ void execute_commands_with_separator(char *input, char **argv, int line_number)
 		free(commands); /* Free commands array */
 	}
 }
-/**
- * execute_command_or_builtin - Executes a command or a built-in function
- * @args: Array of arguments parsed from input.
- * @environ: The environment variables.
- *
- * Description: Reads the user's input using getline, checks for errors,
- *              and handles the EOF condition.
- *
- * Return: 0 if the command was handled successfully or
- *	the command was executed.-1 if there was an error
- *	or the command was not found.
- */
-int execute_command_or_builtin(char **args, char **environ, char *program_name, int line_number)
-{
-	char *command_path;
 
-	if (args[0] != NULL)
+
+/**
+ * handle_builtin - Handles the execution of built-in shell commands.
+ * @args: An array of arguments passed to the command.
+ * @environ: An array of environment variables.
+ * @program_name: The name of the shell program (argv[0]).
+ * @line_number: The line number in the script or input being executed.
+ *
+ * Return: 1 if a built-in command was executed, 0 otherwise.
+ */
+
+int handle_builtin(char **args, char **environ,
+		__attribute__((unused)) char *program_name,
+		__attribute__((unused)) int line_number)
+{
+	if (strcmp(args[0], "exit") == 0)
 	{
-		if (strcmp(args[0], "exit") == 0)
-		{
-			execute_exit(args);
-			return (1); /* Indicate that a built-in command was handled */
-		}
-		if (strcmp(args[0], "cd") == 0)
-		{
-			return (execute_cd(args)); /* Return the result of execute_cd */
-		}
-		if (strcmp(args[0], "env") == 0)
-		{
-			print_env(environ); /* handle built in function */
-			return (1);
-		}
-		if (strcmp(args[0], "setenv") == 0)
-		{
-			execute_setenv(args); /* Handle setenv built-in function */
-			return (1);
-		}
-		if (strcmp(args[0], "unsetenv") == 0)
-		{
-			execute_unsetenv(args); /*Handle unsetenv built-in function */
-			return (1);
-		}
-		command_path = search_path(args[0]);
-		if (command_path != NULL)
-		{
-			args[0] = command_path;
-			execute_command(args, environ, program_name, line_number);
-			free(command_path);
-		}
-		else
-		{
-			/* Print error message with program name and line number */
-			fprintf(stderr, "%s: %d: %s: not found\n", program_name, line_number, args[0]);
-		}
+		execute_exit(args);
+		return (1); /* Indicate that a built-in command was handled */
+	}
+	if (strcmp(args[0], "cd") == 0)
+	{
+		return (execute_cd(args)); /* Return the result of execute_cd */
+	}
+	if (strcmp(args[0], "env") == 0)
+	{
+		print_env(environ); /* handle built in function */
+		return (1);
+	}
+	if (strcmp(args[0], "setenv") == 0)
+	{
+		execute_setenv(args); /* Handle setenv built-in function */
+		return (1);
+	}
+	if (strcmp(args[0], "unsetenv") == 0)
+	{
+		execute_unsetenv(args); /*Handle unsetenv built-in function */
+		return (1);
 	}
 	return (0);
 }
