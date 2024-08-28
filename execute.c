@@ -7,14 +7,18 @@
  *
  * Return: 1 if handled, 0 otherwise.
  */
-int handle_builtins(char **args, char **envp)
+int handle_builtins(char **args, char **envp, char *program_name, int line_number)
 {
+	(void)program_name;  
+	(void)line_number;
+
 	if (args[0] == NULL)
 		return (0);
 
-	printf("Command: %s\n", args[0]);
-
-
+	if (strcmp(args[0], "cd") == 0)
+	{
+		return (execute_cd(args));
+	}
 	if (strcmp(args[0], "exit") == 0)
 	{
 		execute_exit(args);
@@ -47,7 +51,7 @@ int handle_builtins(char **args, char **envp)
  *
  * Return: Nothing.
  */
-static void execute_fork(char *cmd_path, char **args, char **envp)
+void execute_fork(char *cmd_path, char **args, char **envp)
 {
 	pid_t pid = fork();
 
@@ -59,13 +63,25 @@ static void execute_fork(char *cmd_path, char **args, char **envp)
 	}
 	else if (pid == 0)
 	{
-		execve(cmd_path, args, envp);
-		perror("execve");
-		exit(EXIT_FAILURE);
+		/* Child process */
+		if (execve(cmd_path, args, envp) == -1)
+		{
+
+			perror("execve");
+			exit(EXIT_FAILURE);
+		}
 	}
 	else
 	{
-		wait(NULL);
+		/* Parent process */
+		int status;
+
+		/* Wait for the child process to finish */
+		if (waitpid(pid, &status, 0) == -1)
+		{
+			perror("waitpid");
+		}
+
 	}
 }
 
@@ -78,21 +94,24 @@ static void execute_fork(char *cmd_path, char **args, char **envp)
  * forks a new process to execute the command using execve if
  * executable.errpr message if no command found.
  */
-void execute_command(char **args, char **envp)
+void execute_command(char **args, char **envp, char *program_name, int line_number)
 {
 	char *cmd_path;
 
-	if (handle_builtins(args, envp))
+	/* Check if the command is a built-in */
+	if (handle_builtins(args, envp, program_name, line_number))
 		return;
 
 	cmd_path = search_path(args[0]); /* Search for the command in path */
-	if (!cmd_path)
+	if (cmd_path == NULL)
 	{
-		fprintf(stderr, "Command not found: %s\n", args[0]);
+		/* Format error message like /bin/sh: ./hsh: 1: command: not found */
+		fprintf(stderr, "%s: %d: %s: not found\n", program_name, line_number, args[0]);
 		return;
 	}
-	printf("Executing: %s\n", cmd_path);
-	execute_fork(cmd_path, args, envp);
 
+	/* Fork and execute the command */
+	execute_fork(cmd_path, args, envp);
+	/* Free the allocated memory for the command path */
 	free(cmd_path);
 }

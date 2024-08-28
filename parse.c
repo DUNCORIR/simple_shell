@@ -86,3 +86,41 @@ char *custom_strdup(const char *str)
 
 	return (dup_str);
 }
+
+
+/**
+ * parse_commands - Splits input into commands based on ';'
+ * @input: The input string.
+ *
+ * Return: An array of command strings.
+ */
+char **parse_commands(char *input)
+{
+	char **commands;
+	char *token;
+	int i = 0;
+	
+	/* Estimate the number of commands and allocate memory */
+	commands = malloc(sizeof(char *) * (strlen(input) / 2 + 2)); /* memory */
+	if (!commands)
+		return (NULL);
+
+	/* Split the input into commands using custom_strtok */
+	token = custom_strtok(input, ";");
+	while (token != NULL)
+	{
+		commands[i] = custom_strdup(token);
+		if (!commands[i])
+		{
+			while (i > 0) /* Handle memory allocation failure */
+				free(commands[--i]);
+			free(commands);
+			return (NULL);
+		}
+
+		i++;
+		token = custom_strtok(NULL, ";");
+	}
+	commands[i] = NULL;
+	return (commands);
+}

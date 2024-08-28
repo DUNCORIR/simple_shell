@@ -1,5 +1,8 @@
 #include "shell.h"
 
+void handle_env_assignment(char *input);
+void execute_commands_with_separator(char *input, char **argv, int line_number);
+
 /**
  * main - Entry point for simple shell
  * @argc: Argumnet count
@@ -17,9 +20,9 @@ int main(int argc, char **argv)
 	size_t len = 0;
 	ssize_t nread;
 	char **args;
+	int line_number = 1;
 
 	(void)argc;
-	(void)argv;
 
 	while (1)
 	{
@@ -27,10 +30,16 @@ int main(int argc, char **argv)
 		fflush(stdout);
 
 		nread = custom_getline(&input, &len);
-		if (nread == -1) /* Read input from user. */
+		if (nread == -1) /* Handle EOF or error */
 		{
-			free(input);
-			exit(EXIT_FAILURE); /* Exit normally on EOF */
+			if (feof(stdin))
+			{
+				free(input); /* Free memory on EOF */
+				exit(EXIT_SUCCESS); /* Exit normally */
+			}
+			perror("getline"); /* Print error if getline fails */
+			free(input); /* Free memory on error */
+			exit(EXIT_FAILURE); /* Exit with failure on error */
 		}
 		/* Remove newline character if present */
 		if (nread > 0 && input[nread - 1] == '\n')
@@ -40,8 +49,13 @@ int main(int argc, char **argv)
 		/* Parse the input into arguments */
 		args = parse_input(input);
 		/* Execute command or handle built-in */
-		execute_command_or_builtin(args, environ);
-		free(args);
+		if (args && args[0] != NULL) /* Ensure args are valid */
+		{
+			execute_command_or_builtin(args, environ, argv[0], line_number);
+		}
+
+		free(args); /* Free parsed arguments */
+		line_number++; /* Increment line number for each input */
 	}
 
 	free(input); /* Free the input string memory */
@@ -56,10 +70,9 @@ int main(int argc, char **argv)
  * Description: This function reads the user's input using getline,
  * checks for errors, and handles the EOF condition.
  */
-void handle_input(char **input, size_t *len, ssize_t *nread)
+void handle_input(char **input, size_t *len, ssize_t *nread, char **argv, int line_number)
 {
 	char *equal_sign;
-	char **args;
 
 	*nread = custom_getline(input, len);/* Read input from user */
 	if (*nread == -1) /* Check for errors or EOF */
@@ -77,29 +90,54 @@ void handle_input(char **input, size_t *len, ssize_t *nread)
 		(*input)[*nread - 1] = '\0'; /* Replace newline */
 		(*nread)--; /* Adjust length */
 	}
-	equal_sign = strchr(*input, '='); /* Handle environment variable assignment */
+
+	equal_sign = strchr(*input, '=');/* Handle environment variable assignment */
 	if (equal_sign != NULL)
 	{
-		char *var = strtok(*input, "="), *val = strtok(NULL, "=");
-
-		if (var && val)
-		{
-			if (setenv(var, val, 1) == -1)
-				perror("setenv"); /* Handle setenv error */
-		}
-		else
-			fprintf(stderr, "Invalid environment variable assignment\n");
+		handle_env_assignment(*input);
 		return; /* Skip command execution */
 	}
-	args = parse_input(*input);
-	if (args[0] != NULL)
-	{
-		handle_builtins(args, environ); /* Handle built-ins */
-		execute_command(args, environ); /* Execute command */
-	}
-	free(args); /* Free argument list */
+	/* Handle command separators and execute commands */
+	execute_commands_with_separator(*input, argv, line_number);
 }
 
+void handle_env_assignment(char *input)
+{
+	char *var = custom_strtok(input, "=");
+	char *val = custom_strtok(NULL, "=");
+
+	if (var && val)
+	{
+		if (setenv(var, val, 1) == -1)
+			perror("setenv"); /* Handle setenv error */
+	}
+	else
+		fprintf(stderr, "Invalid environment variable assignment\n");
+}
+
+void execute_commands_with_separator(char *input, char **argv, int line_number)
+{
+	char **commands = parse_commands(input);
+
+	int i;
+
+	if (commands)
+	{
+		for (i = 0; commands[i]; i++)
+		{
+			char **args = parse_input(commands[i]);
+			if (args)
+			{
+				execute_command_or_builtin(args, environ, argv[0], line_number);
+				free(args); /* Free parsed arguments */
+			}
+			else
+				fprintf(stderr, "Error parsing command: %s\n", commands[i]);
+			free(commands[i]); /* Free each command string */
+		}
+		free(commands); /* Free commands array */
+	}
+}
 /**
  * execute_command_or_builtin - Executes a command or a built-in function
  * @args: Array of arguments parsed from input.
@@ -107,8 +145,12 @@ void handle_input(char **input, size_t *len, ssize_t *nread)
  *
  * Description: Reads the user's input using getline, checks for errors,
  *              and handles the EOF condition.
+ *
+ * Return: 0 if the command was handled successfully or
+ *	the command was executed.-1 if there was an error
+ *	or the command was not found.
  */
-void execute_command_or_builtin(char **args, char **environ)
+int execute_command_or_builtin(char **args, char **environ, char *program_name, int line_number)
 {
 	char *command_path;
 
@@ -117,33 +159,39 @@ void execute_command_or_builtin(char **args, char **environ)
 		if (strcmp(args[0], "exit") == 0)
 		{
 			execute_exit(args);
+			return (1); /* Indicate that a built-in command was handled */
 		}
-		else if (strcmp(args[0], "env") == 0)
+		if (strcmp(args[0], "cd") == 0)
+		{
+			return (execute_cd(args)); /* Return the result of execute_cd */
+		}
+		if (strcmp(args[0], "env") == 0)
 		{
 			print_env(environ); /* handle built in function */
+			return (1);
 		}
-		else if (strcmp(args[0], "setenv") == 0)
+		if (strcmp(args[0], "setenv") == 0)
 		{
 			execute_setenv(args); /* Handle setenv built-in function */
+			return (1);
 		}
-		else if (strcmp(args[0], "unsetenv") == 0)
+		if (strcmp(args[0], "unsetenv") == 0)
 		{
 			execute_unsetenv(args); /*Handle unsetenv built-in function */
+			return (1);
+		}
+		command_path = search_path(args[0]);
+		if (command_path != NULL)
+		{
+			args[0] = command_path;
+			execute_command(args, environ, program_name, line_number);
+			free(command_path);
 		}
 		else
 		{
-			command_path = search_path(args[0]);
-			if (command_path != NULL)
-			{
-				args[0] = command_path;
-				execute_command(args, environ);
-				free(command_path);
-			}
-			else
-			{
-				/* Print error if command not found */
-				fprintf(stderr, "Command not found: %s\n", args[0]);
-			}
+			/* Print error message with program name and line number */
+			fprintf(stderr, "%s: %d: %s: not found\n", program_name, line_number, args[0]);
 		}
 	}
+	return (0);
 }

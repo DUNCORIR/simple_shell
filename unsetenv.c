@@ -2,8 +2,8 @@
 
 /**
  * execute_unsetenv - Removes an environment variable.
- * @args: Array of arguments (args[1] 
- * 	is the variable name to remove).
+ * @args: Array of arguments (args[1]
+ *	is the variable name to remove).
  *
  * Return: Nothing.
  */

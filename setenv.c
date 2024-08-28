@@ -2,7 +2,7 @@
 
 /**
  *  * execute_setenv - Initializes or modifies an environment variable
- *  @args: Array of arguments (args[1] is the variable name, 
+ *  @args: Array of arguments (args[1] is the variable name,
  *	args[2] is the value).
  *
  * Return: Nothing.

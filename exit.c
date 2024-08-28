@@ -17,19 +17,16 @@ void execute_exit(char **args)
 
 	if (args[1] != NULL)
 	{
-		status = atoi(args[1]);
+		/* Convert the argument to an integer status code */
+		char *endptr; 
+		status = strtol(args[1], &endptr, 10);
 
-		if (status == 0 && strcmp(args[1], "0") != 0)
+		if (*endptr != '\0')
 		{
 			fprintf(stderr, "Invalid exit status: %s\n", args[1]);
-			return;
+			return; /* Return without exiting if status is invalid */
 		}
 	}
-
-	printf("Exiting with status: %d\n", status);
-
-	free(args);
-
 	/*  Exit the shell with the provided or default status */
 	exit(status);
 }
