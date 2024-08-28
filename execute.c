@@ -62,23 +62,30 @@ int execute_fork(char *cmd_path, char **args, char **envp)
 	int status;
 
 	pid = fork();
-	if (pid == 0) /* Child process */
-	{
-		execve(cmd_path, args, envp);
-		perror("execve");
-		free(cmd_path);
-		exit(EXIT_FAILURE);
-	}
-	else if (pid > 0) /* Parent process */
-	{
-		waitpid(pid, &status, 0);
-			if (WIFEXITED(status))
-				return (WEXITSTATUS(status));
-	}
-	else
+	if (pid == -1) /* Fork failed */
 	{
 		perror("fork");
-		exit(EXIT_FAILURE);
+		return (1); /* Return error code */
+	}
+	else if (pid == 0) /* child process */
+	{
+		if (execve(cmd_path, args, envp) == -1)
+		{
+			perror("execve");
+			exit(EXIT_FAILURE); /* Exit child process with failure status */
+		}
+	}
+	else /* Parent process */
+	{
+		if (waitpid(pid, &status, 0) == -1)
+		{
+			perror("waitpid");
+			return (1); /* Return error code */
+		}
+		if (WIFEXITED(status))
+			return (WEXITSTATUS(status)); /* Return exit status of the child process */
+		else
+			return (1); /* Return error code if child did not exit normally */
 	}
 	return (1); /* Return 1 if there was an error */
 }

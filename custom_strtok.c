@@ -34,22 +34,35 @@ char *custom_strtok(char *str, const char *delim)
 
 	if (saved_str[start] == '\0')  /* If no more tokens */
 	{
+		saved_str = NULL;
 		return (NULL);
 	}
 	end = start; /* move to end token */
 	while (saved_str[end] != '\0' && strchr(delim, saved_str[end]) == NULL)
-		end++;
+	{
+		if ((saved_str[end] == '&' && saved_str[end + 1] == '&') ||
+				(saved_str[end] == '|' && saved_str[end + 1] == '|'))			{
+			break;
+			}
+			end++;
+	}
+
+	 token = saved_str + start;
 
 	/* Null terminate the token */
 	if (saved_str[end] != '\0')
 	{
+		if (saved_str[end] == '&' || saved_str[end] == '|')
+		{
+			if (saved_str[end + 1] == saved_str[end])
+				end++;
+		}
 		saved_str[end] = '\0'; /* End of the token */
 		token = saved_str + start;
 		saved_str = saved_str + end + 1; /*Move to the next token */
 	}
 	else
 	{
-		token = saved_str + start;
 		saved_str = NULL; /* No more tokens left */
 	}
 
