@@ -95,37 +95,53 @@ char **parse_commands(char *input)
  */
 char **parse_input(char *input)
 {
-	size_t i = 0;
 	char **args;
 	char *token;
+	size_t bufsize = INIT_BUF_SIZE;
+	size_t position = 0;
+	size_t i;
 
 	/* Allocate memory for argument array */
-	args = malloc(MAX_ARGS * sizeof(char *));
-	if (args == NULL)
+	if (input == NULL)
+	{
+		return (NULL);
+	}
+
+	args = malloc(bufsize * sizeof(char *));
+	if (args == NULL )
 	{
 		perror("malloc");
-		exit(EXIT_FAILURE);
+		return (NULL);
 	}
 	/* Tokenize based on spaces, tabs, and newlines */
 	token = custom_strtok(input, " \t\n");
-	while (token != NULL && i < MAX_ARGS - 1)
+	while (token != NULL)
 	{
-		args[i] = custom_strdup(token); /* Duplicate token into args array */
-		if (args[i] == NULL)
+		if (position >= bufsize)
 		{
-			perror("custom_strdup");
-			while (i > 0)
+			 bufsize += INIT_BUF_SIZE;
+			 args = realloc(args, bufsize * sizeof(char *));
+			 if (args == NULL)
 			{
-				free(args[--i]);/* Free previously allocated strings */
+				 perror("realloc");
+				 return (NULL);
+			}
+		}
+		args[position] = custom_strdup(token);
+		if (args[position] == NULL)
+	       	{
+			perror("custom_strdup");
+			for ((i = 0); i < position; i++)
+			{
+				free(args[i]);
 			}
 			free(args);
-			exit(EXIT_FAILURE);
+			return (NULL);
 		}
-
-		i++;
-		token = custom_strtok(NULL, " \t\n");
+		position++;
+		token = custom_strtok(NULL, " \t");
 	}
-	args[i] = NULL; /* Null-terminate the array of arguments */
+	args[position] = NULL;  /* Null-terminate the array */
 
 	return (args);
 }

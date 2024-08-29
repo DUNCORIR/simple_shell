@@ -16,8 +16,6 @@ extern char **environ;
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#define MAX_ARGS 1024
-
 /* Function prototypes */
 int execute_command(char **args, char **envp, char *program_name,
 		int line_number);
