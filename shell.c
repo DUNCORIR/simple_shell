@@ -19,7 +19,7 @@ void handle_input(char **input, size_t *len,
 	*nread = custom_getline(input, len);/* Read input from user */
 	if (*nread == -1) /* Check for errors or EOF */
 	{
-		if (feof(stdin))
+		if (*nread == 0 || *nread == -1)
 		{
 			free(*input); /* Free the allocated memory for input */
 			exit(EXIT_SUCCESS); /* Exit normally on EOF */
