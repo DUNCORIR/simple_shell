@@ -49,7 +49,7 @@ void free_alias_list(void);
 void execute_commands_with_separator(char *input,
 		char **argv, int line_number);
 void handle_env_assignment(char *input);
-
+int simple_shell(void);
 /* Prototypes for new helper functions */
 void handle_external_command(char **args, char **environ,
 		char *program_name, int line_number);

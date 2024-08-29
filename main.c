@@ -34,7 +34,7 @@ int main(int argc, char **argv)
 				free(input); /* Free memory on EOF */
 				exit(EXIT_SUCCESS); /* Exit normally */
 			}
-			perror("getline"); /* Print error if getline fails */
+			perror("custom_getline"); /* Print error if getline fails */
 			free(input); /* Free memory on error */
 			exit(EXIT_FAILURE); /* Exit with failure on error */
 		}
@@ -46,7 +46,7 @@ int main(int argc, char **argv)
 		args = parse_input(input); /* Parse the input into arguments */
 		if (args && args[0] != NULL) /* Ensure args are valid */
 		{
-			execute_command_or_builtin(args, environ, argv[0], line_number);
+			execute_command(args, environ, argv[0], line_number);
 		}
 		free(args); /* Free parsed arguments */
 		line_number++; /* Increment line number for each input */
