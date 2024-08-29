@@ -58,7 +58,7 @@ int handle_builtins(char **args, char **envp,
  */
 int execute_fork(char *cmd_path, char **args, char **envp)
 {
-	pid_t pid = fork();
+	pid_t pid;
 	int status;
 
 	pid = fork();
@@ -113,7 +113,7 @@ int execute_command(char **args, char **envp, char *program_name,
 
 	/* Check if the command is a built-in */
 	if (handle_builtins(args, envp, program_name, line_number))
-		return (0);
+		return (1);
 
 	cmd_path = search_path(args[0]); /* Search for the command in path */
 	if (cmd_path == NULL)
@@ -124,11 +124,9 @@ int execute_command(char **args, char **envp, char *program_name,
 		return (127);
 	}
 
-	/* Fork and execute the command */
 	status = execute_fork(cmd_path, args, envp);
 	/* Free the allocated memory for the command path */
 	free(cmd_path);
-
 	return (status);
 }
 
@@ -147,10 +145,14 @@ int execute_command_or_builtin(char **args, char **environ,
 {
 	if (args[0] == NULL)
 		return (0);
+	if (search_path(args[0]) != NULL)
+	{
+		handle_external_command(args, environ, program_name, line_number);
+		return (1);
+	}
 
 	if (handle_builtin(args, environ, program_name, line_number))
 		return (1);
 
-	handle_external_command(args, environ, program_name, line_number);
 	return (0);
 }
