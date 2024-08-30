@@ -15,7 +15,7 @@ int main(int argc, char **argv)
 {
 	char *input = NULL;
 	size_t len = 0;
-	ssize_t nread;
+	ssize_t	nread;
 	char **args;
 	int line_number = 1;
 

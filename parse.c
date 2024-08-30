@@ -104,7 +104,7 @@ char **parse_input(char *input)
 		perror("malloc");
 		return (NULL);
 	}
-	token = custom_strtok(input, " \t"); /* Tokenize based on spaces and tabs*/
+	token = custom_strtok(input, " \t;|"); /* Tokenize based on spaces and tabs*/
 	while (token != NULL)
 	{
 		if (position >= bufsize)
@@ -127,7 +127,7 @@ char **parse_input(char *input)
 			return (free(args), NULL);
 		}
 		position++;
-		token = custom_strtok(NULL, " \t");
+		token = custom_strtok(NULL, " \t;|");
 	}
 	args[position] = NULL;  /* Null-terminate the array */
 	return (args);

@@ -10,6 +10,7 @@
 int execute_cd(char **args)
 {
 	char *home_dir, *oldpwd, *new_dir;
+	char cwd[1024]; /* Buffer to store the current working directory */
 
 	home_dir = getenv("HOME"); /* Get the HOME environment variable */
 	new_dir = args[1]; /* Directory to change to */
@@ -17,13 +18,15 @@ int execute_cd(char **args)
 
 	if (!new_dir)
 		new_dir = home_dir ? home_dir : "."; /* Default to hom if none given */
-	if (strcmp(new_dir, "-") == 0) /* Handle 'cd -'to previous directory */
+	if (new_dir[0]== '-' && new_dir[1] == '\0') /* Handle 'cd -'to previous directory*/
 	{
 		if (!oldpwd)  /* Check if OLDPWD is set */
 		{
 			fprintf(stderr, "cd: OLDPWD not set\n");
+				return (-1);
 		}
 		new_dir = oldpwd; /* Set new_dir to OLDPWD */
+		printf("%s\n", new_dir); /* Print the new directory for 'cd -' */
 	}
 
 	if (chdir(new_dir) != 0) /* Change directory and check for success */
@@ -31,8 +34,15 @@ int execute_cd(char **args)
 		perror("cd");
 		return (-1);
 	}
-
-	setenv("OLDPWD", getenv("PWD"), 1); /* Update OLDPWD with current PWD */
-	setenv("PWD", new_dir, 1); /* Update PWD with new directory */
+	if (getcwd(cwd, sizeof(cwd)) != NULL) /* Update OLDPWD with current directory */
+	{
+		setenv("OLDPWD", cwd, 1);
+	}
+	else
+	{
+		perror("getcwd");
+		return (-1);
+	}
+	setenv("PWD", new_dir, 1); /* Update PWD with the new directory */
 	return (0);
 }
