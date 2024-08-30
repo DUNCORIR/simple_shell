@@ -16,9 +16,16 @@ int execute_cd(char **args)
 	new_dir = args[1]; /* Directory to change to */
 	oldpwd = getenv("OLDPWD"); /* Get the OLDPWD environment variable */
 
-	if (!new_dir)
+	if (args[1] != NULL)
+	{
+		new_dir = args[1]; /* Directory to change to */
+	}
+	else
+	{
 		new_dir = home_dir ? home_dir : "."; /* Default to hom if none given */
-	if (new_dir[0]== '-' && new_dir[1] == '\0') /* Handle 'cd -'to previous directory*/
+	}
+
+	if (new_dir[0] == '-' && new_dir[1] == '\0') /* 'cd -'to prev directory*/
 	{
 		if (!oldpwd)  /* Check if OLDPWD is set */
 		{
@@ -34,7 +41,7 @@ int execute_cd(char **args)
 		perror("cd");
 		return (-1);
 	}
-	if (getcwd(cwd, sizeof(cwd)) != NULL) /* Update OLDPWD with current directory */
+	if (getcwd(cwd, sizeof(cwd)) != NULL) /* OLDPWD with current directory */
 	{
 		setenv("OLDPWD", cwd, 1);
 	}
