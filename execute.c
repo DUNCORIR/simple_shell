@@ -134,8 +134,7 @@ int execute_command(char **args, char **envp, char *program_name,
 	if (cmd_path == NULL)
 	{
 		/* Format error message like /bin/sh: ./hsh: 1: command: not found */
-		fprintf(stderr, "%s: %d: %s: not found\n",
-				program_name, line_number, args[0]);
+		fprintf(stderr, "%s: 1: %s: not found\n", program_name, args[0]);
 		return (127);
 	}
 

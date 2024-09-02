@@ -153,7 +153,7 @@ void handle_external_command(char **args, char **environ,
 	}
 	else
 	{
-		fprintf(stderr, "%s: %d: %s: not found\n",
-				program_name, line_number, args[0]);
+		fprintf(stderr, "%s: %d: %s: not found\n", program_name,
+				line_number, args[0]);
 	}
 }

@@ -23,9 +23,13 @@ int main(int argc, char **argv)
 
 	while (1)
 	{
-		printf("$ "); /* Display prompt */
-		fflush(stdout);
-
+		if (isatty(STDIN_FILENO))
+		{
+			
+			printf("$ "); /* Display prompt */
+			fflush(stdout);
+		}
+  
 		nread = custom_getline(&input, &len);
 		if (nread == -1) /* Handle EOF or error */
 		{
