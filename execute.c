@@ -110,17 +110,6 @@ int execute_command(char **args, char **envp, char *program_name,
 {
 	char *cmd_path;
 	int status;
-	char *home_dir;
-	char *new_dir;
-
-
-	home_dir = getenv("HOME"); /* Get the HOME environment variable */
-	new_dir = args[1]; /* Directory to change to */
-	if (!new_dir)
-	{
-		new_dir = home_dir ? home_dir : "."; /* Default to hom if none given */
-	}
-	if (new_dir[0] == '-' && new_dir[1] == '\0') /* 'cd -'to previous directory*/
 	{
 		return (execute_cd(args));
 	}
