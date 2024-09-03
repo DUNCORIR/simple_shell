@@ -43,9 +43,9 @@ char *custom_strtok(char *str, const char *delim)
 	 token = saved_str + start;
 	if (saved_str[end] != '\0') /* Null terminate the token */
 	{
-		if (saved_str[end] == '&' || saved_str[end] == '|')
+		if ((saved_str[end] == '&' && saved_str[end + 1] == '&')
+				|| (saved_str[end] == '|' && saved_str[end + 1] == '|'))
 		{
-			if (saved_str[end + 1] == saved_str[end])
 				end++;
 		}
 		saved_str[end] = '\0'; /* End of the token */

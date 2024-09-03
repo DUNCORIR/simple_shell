@@ -11,7 +11,7 @@ ssize_t custom_getline(char **lineptr, size_t *n)
 	static char buffer[STATIC_BUF_SIZE];
 	static ssize_t buffer_pos, buffer_size;
 	ssize_t num_read = 0;
-	char *new_lineptr, c = 0;
+	char *new_lineptr, c;
 
 	if (!lineptr || !n) /* Validate input */
 		return (-1);
@@ -29,16 +29,26 @@ ssize_t custom_getline(char **lineptr, size_t *n)
 			buffer_size = read(STDIN_FILENO, buffer, STATIC_BUF_SIZE);
 			buffer_pos = 0;
 			if (buffer_size <= 0) /* EOF or error */
-				return ((buffer_size == 0 && num_read > 0) ? num_read : -1);
+			{
+				if (num_read > 0) /* Return what has been read if any */
+				{
+					(*lineptr)[num_read] = '\0';/* Null-terminate the string */
+					return (num_read);
+				}
+				return (-1); /* No data read or error occurred */
+			}
 		}
 		c = buffer[buffer_pos++]; /* Get next character */
 		if (num_read >= (ssize_t)(*n - 1)) /* Resize if buffer full */
 		{
+			*n *= 2;
 			new_lineptr = realloc(*lineptr, *n * 2);
 			if (!new_lineptr)
+			{
+				free(*lineptr); /* Free previously allocated memory */
 				return (-1);
+			}
 			*lineptr = new_lineptr;
-			*n *= 2;
 		}
 		(*lineptr)[num_read++] = c; /* Store character */
 		if (c == '\n') /* Stop at newline */

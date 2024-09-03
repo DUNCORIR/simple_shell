@@ -21,14 +21,12 @@ char *search_path(const char *command)
 	{
 		if (stat(command, &st) == 0 && (st.st_mode & S_IXUSR))
 		{
+			free(path);
 			return (custom_strdup(command)); /* Return absolute path */
 		}
-		else
-		{
-			return (NULL); /* return if not executable */
-		}
+		free(path);
+		return (NULL); /* return if not executable */
 	}
-
 	token = custom_strtok(path, ":"); /* Duplicate PATH environment */
 	while (token != NULL)
 	{
@@ -45,9 +43,10 @@ char *search_path(const char *command)
 			free(path);/* Free the duplicate */
 			return (cmd_path); /* Return the command path */
 		}
-		free(cmd_path);/* free allocated mem and move to next directory */
+		free(cmd_path);
+		cmd_path = NULL; /* Reset cmd_path */
 		token = custom_strtok(NULL, ":");
 	}
-	free(path);
+	free(path); /* Free the duplicated PATH environment */
 	return (NULL);
 }

@@ -33,9 +33,7 @@ char *custom_strdup(const char *str)
 	{
 		dup_str[i] = str[i];
 	}
-
 	dup_str[len] = '\0';
-
 	return (dup_str);
 }
 
@@ -96,38 +94,29 @@ char **parse_commands(char *input)
 char **parse_input(char *input)
 {
 	char **args, *token;
-	size_t bufsize = INIT_BUF_SIZE, position = 0, i;
+	size_t bufsize = INIT_BUF_SIZE, position = 0;
 
 	args = malloc(bufsize * sizeof(char *)); /* Allocate memory for args array */
-	if (args == NULL)
+	if (!args)
 	{
-		perror("malloc");
 		return (NULL);
 	}
-	token = custom_strtok(input, " \t;|"); /* Tokenize based on spaces and tabs*/
+	token = custom_strtok(input, " \t"); /* Tokenize based on spaces and tabs*/
 	while (token != NULL)
 	{
 		if (position >= bufsize)
 		{
-			bufsize += INIT_BUF_SIZE;
+			bufsize *= 2;
 			args = realloc(args, bufsize * sizeof(char *));
 
-			if (args == NULL)
-			{
-				perror("realloc");
+			if (!args)
 				return (NULL);
-			}
 		}
 		args[position] = custom_strdup(token);
-		if (args[position] == NULL)
-		{
-			perror("custom_strdup");
-			for ((i = 0); i < position; i++)
-				free(args[i]);
-			return (free(args), NULL);
-		}
+		if (!args)
+			return (NULL);
 		position++;
-		token = custom_strtok(NULL, " \t;|");
+		token = custom_strtok(NULL, " \t");
 	}
 	args[position] = NULL;  /* Null-terminate the array */
 	return (args);

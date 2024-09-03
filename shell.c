@@ -19,12 +19,13 @@ void handle_input(char **input, size_t *len,
 	*nread = custom_getline(input, len);/* Read input from user */
 	if (*nread == -1) /* Check for errors or EOF */
 	{
-		if (*nread == 0 || *nread == -1)
+		if (*nread == 0) /* EOF */
 		{
 			free(*input); /* Free the allocated memory for input */
 			exit(EXIT_SUCCESS); /* Exit normally on EOF */
 		}
-		perror("getline"); /* Print error message if getline fails */
+		perror("custom_getline"); /* Print error message if getline fails */
+		free(*input); /* Free memory on error */
 		exit(EXIT_FAILURE); /* Exit with failure on error */
 	}
 	if (*nread > 0 && (*input)[*nread - 1] == '\n')

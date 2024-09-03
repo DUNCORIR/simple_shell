@@ -17,7 +17,7 @@ int main(int argc, char **argv)
 	size_t len = 0;
 	ssize_t	nread;
 	char **args;
-	int line_number = 1;
+	int line_number = 1, i;
 
 	(void)argc;
 
@@ -25,11 +25,9 @@ int main(int argc, char **argv)
 	{
 		if (isatty(STDIN_FILENO))
 		{
-			
 			printf("$ "); /* Display prompt */
 			fflush(stdout);
-		}
-  
+		} 
 		nread = custom_getline(&input, &len);
 		if (nread == -1) /* Handle EOF or error */
 		{
@@ -42,8 +40,7 @@ int main(int argc, char **argv)
 			free(input); /* Free memory on error */
 			exit(EXIT_FAILURE); /* Exit with failure on error */
 		}
-		/* Remove newline character if present */
-		if (nread > 0 && input[nread - 1] == '\n')
+		if (nread > 0 && input[nread - 1] == '\n') /* Remove newline character if present */
 		{
 			input[nread - 1] = '\0';
 		}
@@ -51,10 +48,13 @@ int main(int argc, char **argv)
 		if (args && args[0] != NULL) /* Ensure args are valid */
 		{
 			execute_command(args, environ, argv[0], line_number);
+			for (i = 0; args[i] != NULL; i++)
+			{
+				free(args[i]);
+			}
 		}
-		free(args); /* Free parsed arguments */
+		free(args);
 		line_number++; /* Increment line number for each input */
 	}
-	free(input); /* Free the input string memory */
 	return (EXIT_SUCCESS);
 }
