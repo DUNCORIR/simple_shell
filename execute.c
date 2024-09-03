@@ -26,7 +26,7 @@ int handle_builtins(char **args, char **envp,
 	}
 	if (strcmp(args[0], "exit") == 0)
 	{
-		execute_exit(args);
+		execute_exit(args, last_status);
 		return (1);
 	}
 	if (strcmp(args[0], "env") == 0)

@@ -7,9 +7,9 @@
  * Description: The function handles "exit" command shell.
  *
  */
-void execute_exit(char **args)
+void execute_exit(char **args, int last_status)
 {
-	int status = 0;
+	int status = last_status; /* Use the last command status by default */
 
 	if (args[1] != NULL)
 	{

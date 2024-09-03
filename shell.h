@@ -21,7 +21,7 @@ int execute_command(char **args, char **envp, char *program_name,
 		int line_number);
 char **parse_input(char *input);
 char *search_path(const char *command);
-void execute_exit(char **args);
+void execute_exit(char **args, int last_status);
 void print_env(char **envp);
 int execute_command_or_builtin(char **args, char **envp,
 		char *program_name, int line_number);
