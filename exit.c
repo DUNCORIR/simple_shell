@@ -9,7 +9,7 @@
  */
 void execute_exit(char **args, int last_status)
 {
-	int status = last_status; /* Use the last command status by default */
+	int status; 
 
 	if (args[1] != NULL)
 	{
@@ -24,6 +24,10 @@ void execute_exit(char **args, int last_status)
 			exit(2); /* Exit with status 2 for invalid numeric argument */
 		}
 	}
-
+	else
+	{
+		/* No argument provided, use the last command's status */
+		status = last_status;
+	}
 	exit(status); /* Exit with the status code */
 }
