@@ -14,6 +14,7 @@
 int handle_builtins(char **args, char **envp,
 		char *program_name, int line_number)
 {
+	int last_status = 0;
 	(void)program_name;
 	(void)line_number;
 
