@@ -110,21 +110,15 @@ int execute_command(char **args, char **envp, char *program_name,
 {
 	char *cmd_path;
 	int status;
-	char *home_dir;
-	char *new_dir;
 
-
-	home_dir = getenv("HOME"); /* Get the HOME environment variable */
-	new_dir = args[1]; /* Directory to change to */
-	if (!new_dir)
+	if (strcmp(args[0], "cd") == 0) /*Handle the `cd` command, especially `cd -` */
 	{
-		new_dir = home_dir ? home_dir : "."; /* Default to hom if none given */
+		if (args[1] && strcmp(args[1], "-") == 0)
+		{
+			return (execute_cd(args));  /* Handle `cd - */
+		}
+		return execute_cd(args); /* Handle other `cd` cases */
 	}
-	if (new_dir[0] == '-' && new_dir[1] == '\0') /* 'cd -'to previous directory*/
-	{
-		return (execute_cd(args));
-	}
-
 	/* Check if the command is a built-in */
 	if (handle_builtins(args, envp, program_name, line_number))
 	{
@@ -138,7 +132,6 @@ int execute_command(char **args, char **envp, char *program_name,
 				line_number, args[0]);
 		return (127);
 	}
-
 	status = execute_fork(cmd_path, args, envp);
 	/* Free the allocated memory for the command path */
 	free(cmd_path);
@@ -158,16 +151,23 @@ int execute_command(char **args, char **envp, char *program_name,
 int execute_command_or_builtin(char **args, char **environ,
 		char *program_name, int line_number)
 {
+	char *command_path;
+
 	if (args[0] == NULL)
 		return (0);
-	if (search_path(args[0]) != NULL)
-	{
-		handle_external_command(args, environ, program_name, line_number);
-		return (1);
-	}
-
 	if (handle_builtin(args, environ, program_name, line_number))
 		return (1);
-
-	return (0);
+	command_path = search_path(args[0]);
+	if (command_path != NULL)
+	{
+		handle_external_command(args, environ, program_name, line_number);
+		free(command_path); /* free the memory allocated by search_path */
+		return (1);
+	}
+	else
+	{
+		fprintf(stderr, "%s: %d: %s: not found\n",
+				program_name, line_number, args[0]);
+		return (127);
+	}
 }
