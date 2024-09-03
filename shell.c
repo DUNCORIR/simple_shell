@@ -119,9 +119,11 @@ int handle_builtin(char **args, char **environ,
 		__attribute__((unused)) char *program_name,
 		__attribute__((unused)) int line_number)
 {
+	int last_status = 0;
+
 	if (strcmp(args[0], "exit") == 0)
 	{
-		execute_exit(args);
+		execute_exit(args, last_status);
 		return (1); /* Indicate that a built-in command was handled */
 	}
 	if (strcmp(args[0], "cd") == 0)
