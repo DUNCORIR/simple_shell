@@ -11,6 +11,7 @@ int execute_cd(char **args)
 {
 	char *home_dir, *oldpwd, *new_dir;
 	char cwd[1024]; /* Buffer to store the current working directory */
+	char *current_dir;
 
 	home_dir = getenv("HOME"); /* Get the HOME environment variable */
 	oldpwd = getenv("OLDPWD"); /* Get the OLDPWD environment variable */
@@ -23,21 +24,28 @@ int execute_cd(char **args)
 				return (-1);
 		}
 		new_dir = oldpwd; /* Set new_dir to OLDPWD */
-		printf("%s\n", new_dir); /* Print the new directory for 'cd -' */
 	}
 	else
 	{
 		new_dir = args[1] ? args[1] : home_dir ? home_dir : ".";
 	}
+	current_dir = getcwd(cwd, sizeof(cwd)); /* Get the current directory */
 	if (chdir(new_dir) != 0) /* Change directory and check for success */
 	{
-		perror("cd");
+		fprintf(stderr, "./hsh: 1: cd: can't cd to %s\n", new_dir);
 		return (-1);
 	}
-	if (getcwd(cwd, sizeof(cwd)) != NULL) /* OLDPWD with current directory */
+	if (current_dir != NULL) /* OLDPWD with current directory */
 	{
-		setenv("OLDPWD", cwd, 1);
-		setenv("PWD", new_dir, 1);
+		setenv("OLDPWD", current_dir, 1);
+	}
+	if (getcwd(cwd, sizeof(cwd)) != NULL) /* Get and print new working directory */
+	{
+		setenv("PWD", cwd, 1);
+		if (args[1] && args[1][0] == '-' && args[1][1] == '\0')
+		{
+			printf("%s\n", cwd); /* Print the new directory for 'cd -' */
+		}
 	}
 	else
 	{
