@@ -37,8 +37,8 @@ char *custom_strtok(char *str, const char *delim)
 		if ((saved_str[end] == '&' && saved_str[end + 1] == '&') ||
 				(saved_str[end] == '|' && saved_str[end + 1] == '|'))			{
 			break;
-			}
-			end++;
+		}
+		end++;
 	}
 	 token = saved_str + start;
 	if (saved_str[end] != '\0') /* Null terminate the token */
@@ -46,7 +46,7 @@ char *custom_strtok(char *str, const char *delim)
 		if ((saved_str[end] == '&' && saved_str[end + 1] == '&')
 				|| (saved_str[end] == '|' && saved_str[end + 1] == '|'))
 		{
-				end++;
+			end++; /* Skip the second character of the special token */
 		}
 		saved_str[end] = '\0'; /* End of the token */
 		saved_str = saved_str + end + 1; /*Move to the next token */

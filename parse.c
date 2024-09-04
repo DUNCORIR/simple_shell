@@ -14,18 +14,17 @@
 char *custom_strdup(const char *str)
 {
 	char *dup_str;
-	size_t len;
-	size_t i;
+	size_t len, i;
 
 	/* check NULL input */
 	if (str == NULL)
 		return (NULL);
 
 	/* Get the length of input string */
-	len = strlen(str);
+	len = strlen(str) + 1; /* +1 for the null terminator */
 
 	/* Allocate input string to the allocated memory */
-	dup_str = malloc((len + 1) * sizeof(char));
+	dup_str = malloc(len * sizeof(char));
 	if (dup_str == NULL)
 		return (NULL); /* Handle memory allocation failure */
 
@@ -33,10 +32,9 @@ char *custom_strdup(const char *str)
 	{
 		dup_str[i] = str[i];
 	}
-	dup_str[len] = '\0';
+	dup_str[len - 1] = '\0'; /* Copy the string */
 	return (dup_str);
 }
-
 
 /**
  * parse_commands - Splits input into commands based on ';'
@@ -93,12 +91,13 @@ char **parse_commands(char *input)
  */
 char **parse_input(char *input)
 {
-	char **args, *token;
-	size_t bufsize = INIT_BUF_SIZE, position = 0;
+	char **args, **new_args, *token;
+	size_t bufsize = INIT_BUF_SIZE, position = 0, i;
 
 	args = malloc(bufsize * sizeof(char *)); /* Allocate memory for args array */
 	if (!args)
 	{
+		free(args);
 		return (NULL);
 	}
 	token = custom_strtok(input, " \t"); /* Tokenize based on spaces and tabs*/
@@ -107,14 +106,29 @@ char **parse_input(char *input)
 		if (position >= bufsize)
 		{
 			bufsize *= 2;
-			args = realloc(args, bufsize * sizeof(char *));
+			new_args = realloc(args, bufsize * sizeof(char *));
 
-			if (!args)
+			if (!new_args)
+			{
+				for (i = 0; i < position; i++)
+				{
+					free(args[i]);
+				}
+				free(args);
 				return (NULL);
+			}
+			args = new_args;
 		}
 		args[position] = custom_strdup(token);
-		if (!args)
+		if (!args[position])
+		{
+			for (i = 0; i < position; i++)
+			{
+				free(args[i]);
+			}
+			free(args);
 			return (NULL);
+		}
 		position++;
 		token = custom_strtok(NULL, " \t");
 	}

@@ -31,30 +31,32 @@ int main(int argc, char **argv)
 		nread = custom_getline(&input, &len);
 		if (nread == -1) /* Handle EOF or error */
 		{
-			if (nread == 0 || nread == -1)
+			if (input != NULL)
 			{
 				free(input); /* Free memory on EOF */
-				exit(EXIT_SUCCESS); /* Exit normally */
 			}
-			perror("custom_getline"); /* Print error if getline fails */
-			free(input); /* Free memory on error */
-			exit(EXIT_FAILURE); /* Exit with failure on error */
+			exit(EXIT_SUCCESS); /* Exit normally */
 		}
 		if (nread > 0 && input[nread - 1] == '\n') /* Remove newline character if present */
 		{
 			input[nread - 1] = '\0';
 		}
 		args = parse_input(input); /* Parse the input into arguments */
-		if (args && args[0] != NULL) /* Ensure args are valid */
+		if (args)
 		{
-			execute_command(args, environ, argv[0], line_number);
-			for (i = 0; args[i] != NULL; i++)
+			if (args[0] != NULL) /* Ensure args are valid */
 			{
-				free(args[i]);
+				execute_command(args, environ, argv[0], line_number);
+				for (i = 0; args[i] != NULL; i++)
+				{
+					free(args[i]);
+				}
+				free(args); /* Free the args array */
 			}
 		}
-		free(args);
 		line_number++; /* Increment line number for each input */
 	}
+	free(args);
+	free(input); /* Free the input buffer before exiting */
 	return (EXIT_SUCCESS);
 }

@@ -9,7 +9,7 @@
 ssize_t custom_getline(char **lineptr, size_t *n)
 {
 	static char buffer[STATIC_BUF_SIZE];
-	static ssize_t buffer_pos, buffer_size;
+	static ssize_t buffer_pos = 0, buffer_size = 0;
 	ssize_t num_read = 0;
 	char *new_lineptr, c;
 
@@ -35,6 +35,8 @@ ssize_t custom_getline(char **lineptr, size_t *n)
 					(*lineptr)[num_read] = '\0';/* Null-terminate the string */
 					return (num_read);
 				}
+				free(*lineptr); /* Free mem before returning on error*/
+				*lineptr = NULL;
 				return (-1); /* No data read or error occurred */
 			}
 		}
@@ -42,10 +44,11 @@ ssize_t custom_getline(char **lineptr, size_t *n)
 		if (num_read >= (ssize_t)(*n - 1)) /* Resize if buffer full */
 		{
 			*n *= 2;
-			new_lineptr = realloc(*lineptr, *n * 2);
+			new_lineptr = realloc(*lineptr, *n);
 			if (!new_lineptr)
 			{
 				free(*lineptr); /* Free previously allocated memory */
+				*lineptr = NULL;
 				return (-1);
 			}
 			*lineptr = new_lineptr;
