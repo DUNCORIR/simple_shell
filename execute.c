@@ -107,10 +107,21 @@ int execute_fork(char *cmd_path, char **args, char **envp)
  * Return: 0 on success, -1 on error.
  */
 int execute_command(char **args, char **envp, char *program_name,
-		int line_number)
+		int line_number, int last_status)
 {
 	char *cmd_path;
 	int status;
+
+	if (args == NULL || args[0] == NULL)
+	{
+		return (1); /* Handle empty or invalid args */
+	}
+
+	if (strcmp(args[0], "exit") == 0) /* Check for exit command */
+	{
+		execute_exit(args, last_status);
+		return (0); /* Exit the shell */
+	}
 
 	if (strcmp(args[0], "cd") == 0) /*Handle the `cd` command, especially `cd -` */
 	{
@@ -118,7 +129,6 @@ int execute_command(char **args, char **envp, char *program_name,
 		{
 			return (execute_cd(args));  /* Handle `cd - */
 		}
-		return execute_cd(args); /* Handle other `cd` cases */
 	}
 	/* Check if the command is a built-in */
 	if (handle_builtins(args, envp, program_name, line_number))

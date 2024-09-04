@@ -18,7 +18,7 @@ extern char **environ;
 
 /* Function prototypes */
 int execute_command(char **args, char **envp, char *program_name,
-		int line_number);
+		int line_number, int last_status);
 char **parse_input(char *input);
 char *search_path(const char *command);
 void execute_exit(char **args, int last_status);

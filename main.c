@@ -17,7 +17,7 @@ int main(int argc, char **argv)
 	size_t len = 0;
 	ssize_t	nread;
 	char **args;
-	int line_number = 1, i;
+	int line_number = 1, last_status = 0, i;
 
 	(void)argc;
 
@@ -42,21 +42,18 @@ int main(int argc, char **argv)
 			input[nread - 1] = '\0';
 		}
 		args = parse_input(input); /* Parse the input into arguments */
-		if (args)
+		if (args && args[0] != NULL) /* Ensure args are valid */
 		{
-			if (args[0] != NULL) /* Ensure args are valid */
-			{
-				execute_command(args, environ, argv[0], line_number);
+			last_status = execute_command(args, environ,
+					argv[0], line_number, last_status);
 				for (i = 0; args[i] != NULL; i++)
 				{
 					free(args[i]);
 				}
 				free(args); /* Free the args array */
-			}
 		}
 		line_number++; /* Increment line number for each input */
 	}
-	free(args);
 	free(input); /* Free the input buffer before exiting */
 	return (EXIT_SUCCESS);
 }

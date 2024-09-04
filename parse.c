@@ -146,12 +146,14 @@ char **parse_input(char *input)
 void handle_external_command(char **args, char **environ,
 		char *program_name, int line_number)
 {
+	int last_status = 0;
+
 	char *command_path = search_path(args[0]);
 
 	if (command_path != NULL)
 	{
 		args[0] = command_path;
-		execute_command(args, environ, program_name, line_number);
+		execute_command(args, environ, program_name, line_number, last_status);
 		free(command_path);
 	}
 	else

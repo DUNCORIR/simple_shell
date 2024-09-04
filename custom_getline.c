@@ -8,8 +8,8 @@
  */
 ssize_t custom_getline(char **lineptr, size_t *n)
 {
-	static char buffer[STATIC_BUF_SIZE];
-	static ssize_t buffer_pos = 0, buffer_size = 0;
+	char buffer[STATIC_BUF_SIZE];
+	ssize_t buffer_pos = 0, buffer_size = 0;
 	ssize_t num_read = 0;
 	char *new_lineptr, c;
 

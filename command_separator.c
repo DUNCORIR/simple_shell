@@ -68,7 +68,7 @@ void handle_subcommands(char *trimmed_command, char **environ,
 				if (last_status == 0)
 				{
 					last_status = execute_command(parsed_args,
-							environ, program_name, line_number);
+							environ, program_name, line_number, last_status);
 				}
 			}
 			free(parsed_args); /* Free the argument list */
