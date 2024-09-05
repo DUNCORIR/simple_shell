@@ -125,10 +125,7 @@ int execute_command(char **args, char **envp, char *program_name,
 
 	if (strcmp(args[0], "cd") == 0) /*Handle the `cd` command, especially `cd -` */
 	{
-		if (args[1] && strcmp(args[1], "-") == 0)
-		{
 			return (execute_cd(args));  /* Handle `cd - */
-		}
 	}
 	/* Check if the command is a built-in */
 	if (handle_builtins(args, envp, program_name, line_number))
