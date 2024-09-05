@@ -30,21 +30,31 @@ int execute_cd(char **args)
 		new_dir = args[1] ? args[1] : home_dir ? home_dir : ".";
 	}
 	current_dir = getcwd(cwd, sizeof(cwd)); /* Get the current directory */
-	if (chdir(new_dir) != 0) /* Change directory and check for success */
+	if (current_dir == NULL) /* Change directory and check for success */
+	{
+		perror("getcwd");
+		return (-1);
+	}
+	if (chdir(new_dir) != 0) /* OLDPWD with current directory */
 	{
 		fprintf(stderr, "./hsh: 1: cd: can't cd to %s\n", new_dir);
 		return (-1);
 	}
-	if (current_dir != NULL) /* OLDPWD with current directory */
+	if (setenv("OLDPWD", current_dir, 1) != 0)
 	{
-		setenv("OLDPWD", current_dir, 1);
+		perror("setenv");
+		return (-1);
 	}
-	if (getcwd(cwd, sizeof(cwd)) != NULL) /* Get and print new working directory */
+	if (getcwd(cwd, sizeof(cwd)) != NULL)
 	{
-		setenv("PWD", cwd, 1);
+		if (setenv("PWD", cwd, 1) != 0)
+		{
+			perror("setenv");
+			return (-1);
+		}
 		if (args[1] && args[1][0] == '-' && args[1][1] == '\0')
 		{
-			printf("%s\n", cwd); /* Print the new directory for 'cd -' */
+			printf("%s\n", cwd);
 		}
 	}
 	else
