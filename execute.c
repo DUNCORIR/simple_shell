@@ -72,8 +72,8 @@ int execute_fork(char *cmd_path, char **args, char **envp)
 	{
 		if (execve(cmd_path, args, envp) == -1)
 		{
-			perror("execve");
-			exit(EXIT_FAILURE); /* Exit child process with failure status */
+			perror(args[0]); /* Print command name instead of 'execve' */
+			exit(2); /* Exit with status 2 to indicate failure (adjust as needed) */
 		}
 	}
 	else /* Parent process */
@@ -120,7 +120,7 @@ int execute_command(char **args, char **envp, char *program_name,
 	if (strcmp(args[0], "exit") == 0) /* Check for exit command */
 	{
 		execute_exit(args, last_status);
-		return (0); /* Exit the shell */
+		return (1); /* Exit the shell */
 	}
 
 	if (strcmp(args[0], "cd") == 0) /*Handle the `cd` command, especially `cd -` */
