@@ -11,6 +11,7 @@ void execute_exit(char **args, int last_status)
 {
 	int status; 
 	char *endptr;
+	int i;
 
 	if (args[1] != NULL)
 	{
@@ -29,6 +30,11 @@ void execute_exit(char **args, int last_status)
 	else
 	{
 		status = last_status % 256; /* Last command's status if no argument is provided */
+	}
+	/* Free each argument string (if they were dynamically allocated) */
+	for (i = 0; args[i] != NULL; i++)
+	{
+		free(args[i]);
 	}
 	free(args);
 	exit(status); /* Exit with the status code */
