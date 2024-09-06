@@ -15,6 +15,7 @@ void handle_input(char **input, size_t *len,
 		ssize_t *nread, char **argv, int line_number)
 {
 	char *equal_sign;
+	int last_status = 0;
 
 	*nread = custom_getline(input, len);/* Read input from user */
 	if (*nread == -1) /* Check for errors or EOF */
@@ -41,7 +42,7 @@ void handle_input(char **input, size_t *len,
 		return; /* Skip command execution */
 	}
 	/* Handle command separators and execute commands */
-	execute_commands_with_separator(*input, argv, line_number);
+	execute_commands_with_separator(*input, argv, line_number, last_status);
 }
 
 /**
@@ -79,7 +80,8 @@ void handle_env_assignment(char *input)
  *
  */
 
-void execute_commands_with_separator(char *input, char **argv, int line_number)
+void execute_commands_with_separator(char *input, char **argv,
+		int line_number, int last_status)
 {
 	char **commands = parse_commands(input);
 
@@ -89,7 +91,7 @@ void execute_commands_with_separator(char *input, char **argv, int line_number)
 	{
 		for (i = 0; commands[i]; i++)
 		{
-			char **args = parse_input(commands[i]);
+			char **args = parse_input(commands[i], last_status);
 
 			if (args)
 			{

@@ -42,7 +42,7 @@ int main(int argc, char **argv)
 		{
 			lineptr[nread - 1] = '\0';
 		}
-		args = parse_input(lineptr); /* Parse the input into arguments */
+		args = parse_input(lineptr, last_status); /* Parse the input into arguments */
 		if (args && args[0] != NULL) /* Ensure args are valid */
 		{
 			last_status = execute_command(args, environ,
@@ -58,3 +58,60 @@ int main(int argc, char **argv)
 	free(lineptr); /* Free the input buffer before exiting */
 	return (EXIT_SUCCESS);
 }
+
+void handle_logical_operators(char *input, char **argv,
+		int *last_status, int *line_number)
+{
+	char *token, *rest = input;
+	int logical_operator = 0; /* 0: None, 1: &&, 2: */
+	(void)argv;
+
+	while ((token = custom_strtok(rest, " \t")) != NULL)
+	{
+		if (strcmp(token, "&&") == 0)
+		{
+			logical_operator = 1;
+			rest = NULL;
+			continue;
+		}
+		else if (strcmp(token, "||") == 0)
+		{
+			logical_operator = 2;
+			rest = NULL; /* Continue to next token */
+			continue;
+		}
+		/* Execute the command */
+		 execute_commands(token, argv, argv[0], *line_number);
+		/* Handle logical operators */
+		if (logical_operator == 1 && *last_status != 0)
+		{
+			/*Skip the next command if the last command failed */
+			while ((token = custom_strtok(rest, " \t")) != NULL)
+			{
+				if (strcmp(token, "&&") == 0 || strcmp(token, "||") == 0)
+				{
+					logical_operator = 0; /* reset operator */
+					rest = NULL;
+					break;
+				}
+				rest = NULL; /* Continue to next token */
+			}
+		}
+		else if (logical_operator == 2 && *last_status == 0)
+		{
+			/* Skip the next command if the last command succeeded*/
+			while ((token = custom_strtok(rest, " \t")) != NULL)
+			{
+				if (strcmp(token, "&&") == 0 || strcmp(token, "||") == 0)
+				{
+					logical_operator = 0;
+					rest = NULL;
+					break;
+				}
+				rest = NULL; /* Continue to next token */
+			}
+		}
+		logical_operator = 0; /* reset logical operator */
+	}
+}
+				

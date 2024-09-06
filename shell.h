@@ -19,7 +19,7 @@ extern char **environ;
 /* Function prototypes */
 int execute_command(char **args, char **envp, char *program_name,
 		int line_number, int last_status);
-char **parse_input(char *input);
+char **parse_input(char *input, int last_status);
 char *search_path(const char *command);
 void execute_exit(char **args, int last_status);
 void print_env(char **envp);
@@ -45,7 +45,7 @@ void remove_alias(const char *name);
 void add_alias(const char *name, const char *value);
 void free_alias_list(void);
 void execute_commands_with_separator(char *input,
-		char **argv, int line_number);
+		char **argv, int line_number, int last_status);
 void handle_env_assignment(char *input);
 int simple_shell(void);
 /* Prototypes for new helper functions */
@@ -55,5 +55,7 @@ int handle_builtin(char **args, char **environ,
 		char *program_name, int line_number);
 void handle_subcommands(char *trimmed_command,
 		char **environ, char *program_name, int line_number);
-
+void handle_logical_operators(char *input, char **argv,
+		                int *last_status, int *line_number);
+char *int_to_string(int num);
 #endif /* SHELL_H */

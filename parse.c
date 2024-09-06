@@ -105,9 +105,9 @@ char **parse_commands(char *input)
  * Return: A pointer to an array of strings (char **), where each string
  * is an argument parsed from the input.
  */
-char **parse_input(char *input)
+char **parse_input(char *input, int last_status)
 {
-	char **args, **new_args, *token;
+	char **args, **new_args, *token, *replaced_token;
 	size_t bufsize = INIT_BUF_SIZE, position = 0, i;
 
 	args = malloc(bufsize * sizeof(char *)); /* Allocate memory for args array */
@@ -134,8 +134,19 @@ char **parse_input(char *input)
 			}
 			args = new_args;
 		}
-		args[position] = custom_strdup(token);
-		if (!args[position])
+		if (strcmp(token, "$?") == 0) /* Handle variable replacement */
+		{
+			replaced_token = int_to_string(last_status);
+		}
+		else if (strcmp(token, "$$") == 0)
+		{
+			replaced_token = int_to_string(getpid());
+		}
+		else
+		{
+			replaced_token = custom_strdup(token);
+		}
+		if (!replaced_token)
 		{
 			for (i = 0; i < position; i++)
 			{
@@ -144,12 +155,30 @@ char **parse_input(char *input)
 			free(args);
 			return (NULL);
 		}
+		args[position] = replaced_token;
 		position++;
 		token = custom_strtok(NULL, " \t");
 	}
 	args[position] = NULL;  /* Null-terminate the array */
 	return (args);
 }
+
+char *int_to_string(int num)
+{
+	char *str;
+	int len = snprintf(NULL, 0, "%d", num);
+	str = malloc(len + 1);
+	if (str)
+	{
+		snprintf(str, len + 1, "%d", num);
+	}
+	return str;
+}
+
+
+
+
+
 
 /**
  * handle_external_command - Handles the execution of external commands.

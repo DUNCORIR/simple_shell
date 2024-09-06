@@ -53,15 +53,16 @@ void handle_subcommands(char *trimmed_command, char **environ,
 {
 	char *subcommand;
 	int last_status = 0;
+	char *trimmed_subcommand;
 
 	subcommand = custom_strtok(trimmed_command, "&&"); /* Handle '&&' */
 	while (subcommand != NULL)
 	{
-		char *subsubcommand = custom_strtok(subcommand, "||"); /* Handle '||' */
+		trimmed_subcommand = custom_strtok(subcommand, "||");
 
-		while (subsubcommand != NULL)
+		while (trimmed_subcommand != NULL)
 		{
-			char **parsed_args = parse_input(subsubcommand);
+			char **parsed_args = parse_input(trimmed_subcommand, last_status);
 
 			if (parsed_args[0] != NULL)
 			{
@@ -72,7 +73,7 @@ void handle_subcommands(char *trimmed_command, char **environ,
 				}
 			}
 			free(parsed_args); /* Free the argument list */
-			subsubcommand = custom_strtok(NULL, "||");
+			trimmed_subcommand = custom_strtok(NULL, "||");
 		}
 		subcommand = custom_strtok(NULL, "&&");
 	}

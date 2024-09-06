@@ -22,7 +22,7 @@ ssize_t custom_getline(char **lineptr, size_t *n)
 			return (-1);
 		*n = INIT_BUF_SIZE;
 	}
-	while (1)
+	while (1) /* Refill buffer if empty */
 	{
 		if (buffer_pos >= buffer_size)  /* Refill buffer if empty */
 		{
