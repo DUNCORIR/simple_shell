@@ -84,9 +84,13 @@ int execute_fork(char *cmd_path, char **args, char **envp)
 			return (1); /* Return error code */
 		}
 		if (WIFEXITED(status))
+		{
 			return (WEXITSTATUS(status)); /* Return exit status of the child process */
+		}
 		else
+		{
 			return (1); /* Return error code if child did not exit normally */
+		}
 	}
 	return (1); /* Return 1 if there was an error */
 }
