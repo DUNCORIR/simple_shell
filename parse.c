@@ -44,12 +44,12 @@ char *custom_strdup(const char *str)
  */
 char **parse_commands(char *input)
 {
-	char **commands;
+	char **commands, **new_commands;
 	char *token;
-	int i = 0;
+	size_t bufsize = INIT_BUF_SIZE, i = 0;
 
 	/* Estimate the number of commands and allocate memory */
-	commands = malloc(sizeof(char *) * (strlen(input) / 2 + 2)); /* memory */
+	commands = malloc(sizeof(char *)); /* memory */
 	if (!commands)
 		return (NULL);
 
@@ -58,10 +58,26 @@ char **parse_commands(char *input)
 	while (token != NULL)
 	{
 		char *subtoken; /* Split further by && and || */
-
+		/* Split further by spaces or tabs */
 		subtoken = custom_strtok(token, " \t");
 		while (subtoken != NULL)
 		{
+			/* Resize the commands array if needed */
+			if (i >= bufsize)
+			{
+				bufsize *= 2;
+				new_commands = realloc(commands, bufsize * sizeof(char *));
+				if (!new_commands)
+				 {
+					 /* Free previously allocated memory if realloc fails */
+					 while (i > 0)
+						 free(commands[--i]);
+					 free(commands);
+					 return (NULL);
+				}
+				commands = new_commands;
+			}
+
 			commands[i] = custom_strdup(subtoken);
 			if (!commands[i])
 			{
@@ -97,7 +113,6 @@ char **parse_input(char *input)
 	args = malloc(bufsize * sizeof(char *)); /* Allocate memory for args array */
 	if (!args)
 	{
-		free(args);
 		return (NULL);
 	}
 	token = custom_strtok(input, " \t"); /* Tokenize based on spaces and tabs*/

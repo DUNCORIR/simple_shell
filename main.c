@@ -13,7 +13,7 @@
  */
 int main(int argc, char **argv)
 {
-	char *input = NULL;
+	char *lineptr = NULL;
 	size_t len = 0;
 	ssize_t	nread;
 	char **args;
@@ -28,20 +28,21 @@ int main(int argc, char **argv)
 			printf("$ "); /* Display prompt */
 			fflush(stdout);
 		} 
-		nread = custom_getline(&input, &len);
+		nread = custom_getline(&lineptr, &len);
 		if (nread == -1) /* Handle EOF or error */
 		{
-			if (input != NULL)
+			if (lineptr != NULL)
 			{
-				free(input); /* Free memory on EOF */
+				free(lineptr); /* Free memory on EOF */
+				lineptr = NULL;
 			}
 			exit(EXIT_SUCCESS); /* Exit normally */
 		}
-		if (nread > 0 && input[nread - 1] == '\n') /* Remove newline character if present */
+		if (nread > 0 && lineptr[nread - 1] == '\n') /* Remove newline character if present */
 		{
-			input[nread - 1] = '\0';
+			lineptr[nread - 1] = '\0';
 		}
-		args = parse_input(input); /* Parse the input into arguments */
+		args = parse_input(lineptr); /* Parse the input into arguments */
 		if (args && args[0] != NULL) /* Ensure args are valid */
 		{
 			last_status = execute_command(args, environ,
@@ -54,6 +55,6 @@ int main(int argc, char **argv)
 		}
 		line_number++; /* Increment line number for each input */
 	}
-	free(input); /* Free the input buffer before exiting */
+	free(lineptr); /* Free the input buffer before exiting */
 	return (EXIT_SUCCESS);
 }
