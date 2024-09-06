@@ -4,7 +4,7 @@
 extern char **environ;
 
 #define MAX_ARGS 1024
-#define INIT_BUF_SIZE 256        /* Initial buffer size */
+#define INIT_BUF_SIZE 64 /* Initial buffer size */
 #define STATIC_BUF_SIZE 1024     /* Static buffer size */
 
 #include <stdio.h>

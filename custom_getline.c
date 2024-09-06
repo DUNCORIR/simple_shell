@@ -33,6 +33,7 @@ ssize_t custom_getline(char **lineptr, size_t *n)
 				if (num_read > 0) /* Return what has been read if any */
 				{
 					(*lineptr)[num_read] = '\0';/* Null-terminate the string */
+					free(*lineptr);
 					return (num_read);
 				}
 				free(*lineptr); /* Free mem before returning on error*/
@@ -51,6 +52,7 @@ ssize_t custom_getline(char **lineptr, size_t *n)
 				*lineptr = NULL;
 				return (-1);
 			}
+			free(*lineptr);
 			*lineptr = new_lineptr;
 		}
 		(*lineptr)[num_read++] = c; /* Store character */
