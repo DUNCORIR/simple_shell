@@ -52,39 +52,30 @@ char **parse_commands(char *input)
 	commands = malloc(sizeof(char *)); /* memory */
 	if (!commands)
 		return (NULL);
-
-	/* Split the input into commands using custom_strtok */
-	token = custom_strtok(input, ";");
+	token = custom_strtok(input, ";"); /* Split to commands by custom_strtok */
 	while (token != NULL)
 	{
 		char *subtoken; /* Split further by && and || */
-		/* Split further by spaces or tabs */
-		subtoken = custom_strtok(token, " \t");
+
+		subtoken = custom_strtok(token, " \t"); /* Split by spaces/tabs */
 		while (subtoken != NULL)
 		{
-			/* Resize the commands array if needed */
-			if (i >= bufsize)
+			if (i >= bufsize) /* Resize the commands array if needed */
 			{
 				bufsize *= 2;
 				new_commands = realloc(commands, bufsize * sizeof(char *));
 				if (!new_commands)
-				 {
-					 /* Free previously allocated memory if realloc fails */
-					 while (i > 0)
-						 free(commands[--i]);
-					 free(commands);
-					 return (NULL);
+				{
+					handle_allocation_failure(commands, i);
+					return (NULL);
 				}
 				commands = new_commands;
 			}
-
 			commands[i] = custom_strdup(subtoken);
 			if (!commands[i])
 			{
-				while (i > 0) /* Handle memory allocation failure */
-					free(commands[--i]);
-			free(commands);
-			return (NULL);
+				handle_allocation_failure(commands, i);
+				return (NULL);
 			}
 			i++;
 			subtoken = custom_strtok(NULL, " \t");
@@ -96,26 +87,24 @@ char **parse_commands(char *input)
 }
 
 /**
- * parse_input - Parses input string into an array of arguments.
- * @input: input string from user.
+ * parse_input - Parses the input string into an
+ * array of arguments, handling variable replacement.
+ * @input: The input string containing arguments
+ * separated by spaces and tabs.
+ * @last_status: The status code of the last executed command.
  *
- * Description: Tokenizes the input string using spaces, tabs, and newlines
- * as delimiters, and stores each token in the args array.
- *
- * Return: A pointer to an array of strings (char **), where each string
- * is an argument parsed from the input.
+ * Return: An array of arguments or NULL on failure.
  */
 char **parse_input(char *input, int last_status)
 {
-	char **args, **new_args, *token, *replaced_token;
-	size_t bufsize = INIT_BUF_SIZE, position = 0, i;
+	char **new_args, **args, *token, *replaced_token;
+	size_t bufsize = INIT_BUF_SIZE, position = 0;
 
-	args = malloc(bufsize * sizeof(char *)); /* Allocate memory for args array */
+	args = malloc(bufsize * sizeof(char *));
 	if (!args)
-	{
 		return (NULL);
-	}
-	token = custom_strtok(input, " \t"); /* Tokenize based on spaces and tabs*/
+
+	token = custom_strtok(input, " \t");
 	while (token != NULL)
 	{
 		if (position >= bufsize)
@@ -125,34 +114,15 @@ char **parse_input(char *input, int last_status)
 
 			if (!new_args)
 			{
-				for (i = 0; i < position; i++)
-				{
-					free(args[i]);
-				}
-				free(args);
+				handle_allocation_failure(args, position);
 				return (NULL);
 			}
 			args = new_args;
 		}
-		if (strcmp(token, "$?") == 0) /* Handle variable replacement */
-		{
-			replaced_token = int_to_string(last_status);
-		}
-		else if (strcmp(token, "$$") == 0)
-		{
-			replaced_token = int_to_string(getpid());
-		}
-		else
-		{
-			replaced_token = custom_strdup(token);
-		}
+		replaced_token = handle_variable_replacement(token, last_status);
 		if (!replaced_token)
 		{
-			for (i = 0; i < position; i++)
-			{
-				free(args[i]);
-			}
-			free(args);
+			handle_allocation_failure(args, position);
 			return (NULL);
 		}
 		args[position] = replaced_token;
@@ -163,22 +133,27 @@ char **parse_input(char *input, int last_status)
 	return (args);
 }
 
-char *int_to_string(int num)
+/**
+ * handle_variable_replacement - Replaces variables
+ * with their corresponding values.
+ * @token: The token to check for variable replacement.
+ * @last_status: The status code of the last executed command.
+ *
+ * Return: A string with variables replaced or NULL on failure.
+ */
+char *handle_variable_replacement(const char *token, int last_status)
 {
-	char *str;
-	int len = snprintf(NULL, 0, "%d", num);
-	str = malloc(len + 1);
-	if (str)
-	{
-		snprintf(str, len + 1, "%d", num);
-	}
-	return str;
+	char *replaced_token;
+
+	if (strcmp(token, "$?") == 0)
+		replaced_token = int_to_string(last_status);
+	else if (strcmp(token, "$$") == 0)
+		replaced_token = int_to_string(getpid());
+	else
+		replaced_token = custom_strdup(token);
+
+	return (replaced_token);
 }
-
-
-
-
-
 
 /**
  * handle_external_command - Handles the execution of external commands.

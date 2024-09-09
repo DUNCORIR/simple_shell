@@ -9,7 +9,7 @@
  */
 void execute_exit(char **args, int last_status)
 {
-	int status; 
+	int status;
 	char *endptr;
 	int i;
 
@@ -29,7 +29,7 @@ void execute_exit(char **args, int last_status)
 	}
 	else
 	{
-		status = last_status % 256; /* Last command's status if no argument is provided */
+		status = last_status % 256; /* Last command's status if no argument given */
 	}
 	/* Free each argument string (if they were dynamically allocated) */
 	for (i = 0; args[i] != NULL; i++)

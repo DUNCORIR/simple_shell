@@ -15,103 +15,62 @@ int main(int argc, char **argv)
 {
 	char *lineptr = NULL;
 	size_t len = 0;
-	ssize_t	nread;
-	char **args;
-	int line_number = 1, last_status = 0, i;
+	ssize_t	nread = 0;
+	int line_number = 1;
 
 	(void)argc;
 
 	while (1)
 	{
-		if (isatty(STDIN_FILENO))
-		{
-			printf("$ "); /* Display prompt */
-			fflush(stdout);
-		} 
+		display_prompt();  /* Helper function to display the prompt */
+
 		nread = custom_getline(&lineptr, &len);
 		if (nread == -1) /* Handle EOF or error */
 		{
-			if (lineptr != NULL)
-			{
-				free(lineptr); /* Free memory on EOF */
-				lineptr = NULL;
-			}
+			free(lineptr); /* Free memory on EOF */
 			exit(EXIT_SUCCESS); /* Exit normally */
 		}
-		if (nread > 0 && lineptr[nread - 1] == '\n') /* Remove newline character if present */
-		{
+		if (nread > 0 && lineptr[nread - 1] == '\n') /* Rm newline character  */
 			lineptr[nread - 1] = '\0';
-		}
-		args = parse_input(lineptr, last_status); /* Parse the input into arguments */
-		if (args && args[0] != NULL) /* Ensure args are valid */
-		{
-			last_status = execute_command(args, environ,
-					argv[0], line_number, last_status);
-				for (i = 0; args[i] != NULL; i++)
-				{
-					free(args[i]);
-				}
-				free(args); /* Free the args array */
-		}
-		line_number++; /* Increment line number for each input */
+		handle_input(lineptr, argv, line_number);  /* Process input */
+		line_number++;  /* Increment line number for each input */
 	}
-	free(lineptr); /* Free the input buffer before exiting */
+	free(lineptr);  /* Free input buffer before exiting */
 	return (EXIT_SUCCESS);
 }
+/* Helper function to display the shell prompt */
 
-void handle_logical_operators(char *input, char **argv,
-		int *last_status, int *line_number)
+/**
+ * display_prompt - Displays the shell prompt to the user.
+ * This function checks if the input is from a terminal (interactive mode)
+ * and, if true, displays the shell prompt (`$`) to indicate readiness
+ * for input. It flushes the output buffer after printing.
+ */
+void display_prompt(void)
 {
-	char *token, *rest = input;
-	int logical_operator = 0; /* 0: None, 1: &&, 2: */
-	(void)argv;
-
-	while ((token = custom_strtok(rest, " \t")) != NULL)
+	if (isatty(STDIN_FILENO))  /* Check if input is from terminal */
 	{
-		if (strcmp(token, "&&") == 0)
-		{
-			logical_operator = 1;
-			rest = NULL;
-			continue;
-		}
-		else if (strcmp(token, "||") == 0)
-		{
-			logical_operator = 2;
-			rest = NULL; /* Continue to next token */
-			continue;
-		}
-		/* Execute the command */
-		 execute_commands(token, argv, argv[0], *line_number);
-		/* Handle logical operators */
-		if (logical_operator == 1 && *last_status != 0)
-		{
-			/*Skip the next command if the last command failed */
-			while ((token = custom_strtok(rest, " \t")) != NULL)
-			{
-				if (strcmp(token, "&&") == 0 || strcmp(token, "||") == 0)
-				{
-					logical_operator = 0; /* reset operator */
-					rest = NULL;
-					break;
-				}
-				rest = NULL; /* Continue to next token */
-			}
-		}
-		else if (logical_operator == 2 && *last_status == 0)
-		{
-			/* Skip the next command if the last command succeeded*/
-			while ((token = custom_strtok(rest, " \t")) != NULL)
-			{
-				if (strcmp(token, "&&") == 0 || strcmp(token, "||") == 0)
-				{
-					logical_operator = 0;
-					rest = NULL;
-					break;
-				}
-				rest = NULL; /* Continue to next token */
-			}
-		}
-		logical_operator = 0; /* reset logical operator */
+		printf("$ ");
+		fflush(stdout);
 	}
 }
-				
+
+/* Helper function to free parsed arguments */
+
+/**
+ * free_args - Frees the memory allocated for parsed arguments.
+ * @args: The array of arguments to be freed.
+ *
+ * This function loops through the array of arguments and frees each one,
+ * followed by freeing the array itself.
+ */
+void free_args(char **args)
+{
+	int i;
+
+	for (i = 0; args[i] != NULL; i++)
+	{
+		free(args[i]);
+	}
+	free(args);
+}

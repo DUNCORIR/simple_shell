@@ -78,3 +78,33 @@ void handle_subcommands(char *trimmed_command, char **environ,
 		subcommand = custom_strtok(NULL, "&&");
 	}
 }
+
+/**
+ * int_to_string - Converts an integer to a string.
+ * @num: The integer to convert.
+ *
+ * Return: The string representation of the integer or NULL on failure.
+ */
+char *int_to_string(int num)
+{
+	char *str;
+	int len = snprintf(NULL, 0, "%d", num);
+
+	str = malloc(len + 1);
+	if (str)
+		snprintf(str, len + 1, "%d", num);
+	return (str);
+}
+
+/**
+ * handle_allocation_failure - Handles memory allocation
+ * failure by freeing allocated memory.
+ * @commands: The commands array to free.
+ * @count: The number of allocated commands to free.
+ */
+void handle_allocation_failure(char **commands, size_t count)
+{
+	while (count > 0)
+		free(commands[--count]);
+	free(commands);
+}

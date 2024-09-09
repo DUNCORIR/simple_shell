@@ -2,47 +2,38 @@
 
 /**
  * handle_input - Handles reading input from the user.
- * @input: Pointer to the input string.
- * @len: Pointer to the size of the buffer for getline.
- * @nread: Pointer to store the number of bytes read by getline.
+ * @lineptr: The input string to process.
+ * @last_status: The status code of the last executed command.
  * @argv: Array of arguments
  * @line_number: The current line number being processed.
  *
  * Description: This function reads the user's input using getline,
  * checks for errors, and handles the EOF condition.
  */
-void handle_input(char **input, size_t *len,
-		ssize_t *nread, char **argv, int line_number)
+void handle_input(char *lineptr, char **argv, int line_number)
 {
 	char *equal_sign;
 	int last_status = 0;
+	char **args;
 
-	*nread = custom_getline(input, len);/* Read input from user */
-	if (*nread == -1) /* Check for errors or EOF */
-	{
-		if (*nread == 0) /* EOF */
-		{
-			free(*input); /* Free the allocated memory for input */
-			exit(EXIT_SUCCESS); /* Exit normally on EOF */
-		}
-		perror("custom_getline"); /* Print error message if getline fails */
-		free(*input); /* Free memory on error */
-		exit(EXIT_FAILURE); /* Exit with failure on error */
-	}
-	if (*nread > 0 && (*input)[*nread - 1] == '\n')
-	{
-		(*input)[*nread - 1] = '\0'; /* Replace newline */
-		(*nread)--; /* Adjust length */
-	}
 
-	equal_sign = strchr(*input, '=');/* Handle environment variable assignment */
+	if (lineptr == NULL)
+		return;
+
+	equal_sign = strchr(lineptr, '=');/* Handle environment variable assignment */
 	if (equal_sign != NULL)
 	{
-		handle_env_assignment(*input);
+		handle_env_assignment(lineptr);
 		return; /* Skip command execution */
 	}
-	/* Handle command separators and execute commands */
-	execute_commands_with_separator(*input, argv, line_number, last_status);
+	args = parse_input(lineptr, last_status);
+
+	if (args && args[0] != NULL) /* Execute command if args are valid */
+	{
+		last_status = execute_command(args,
+				environ, argv[0], line_number, last_status);
+		free_args(args); /* Free the argument array */
+	}
 }
 
 /**
@@ -72,6 +63,7 @@ void handle_env_assignment(char *input)
  * @input: The input string containing commands separated by ';'.
  * @argv: The argument vector of the shell.
  * @line_number: The current line number being executed.
+ * @last_status: The status code of the last executed command.
  *
  * Description: This function splits the input string into
  * individual commands based on the command separator ';'.
@@ -95,7 +87,8 @@ void execute_commands_with_separator(char *input, char **argv,
 
 			if (args)
 			{
-				execute_command_or_builtin(args, environ, argv[0], line_number);
+				last_status = execute_command_or_builtin(args,
+						environ, argv[0], line_number);
 				free(args); /* Free parsed arguments */
 			}
 			else

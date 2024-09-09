@@ -10,8 +10,7 @@
 int execute_cd(char **args)
 {
 	char *home_dir, *oldpwd, *new_dir;
-	char cwd[1024]; /* Buffer to store the current working directory */
-	char *current_dir;
+	char cwd[1024], *current_dir; /* Buffer to store current working dir */
 
 	home_dir = getenv("HOME"); /* Get the HOME environment variable */
 	oldpwd = getenv("OLDPWD"); /* Get the OLDPWD environment variable */
