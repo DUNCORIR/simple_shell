@@ -3,7 +3,6 @@
 /**
  * handle_input - Handles reading input from the user.
  * @lineptr: The input string to process.
- * @last_status: The status code of the last executed command.
  * @argv: Array of arguments
  * @line_number: The current line number being processed.
  *

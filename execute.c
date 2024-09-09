@@ -52,7 +52,7 @@ int handle_builtins(char **args, char **envp,
 /**
  * execute_fork - Forks a process and executes the command.
  * @cmd_path: Full path to the command.
- * @last_status - The last status of argument.
+ * @last_status: The status code of the last executed command.
  * @args: Array of arguments.
  * @envp: The environment vector.
  *
@@ -105,7 +105,7 @@ int execute_fork(char *cmd_path, char **args, char **envp, int *last_status)
  *	shell program (for error messages).
  * @line_number: The line number of the command in
  *	the input (for error messages).
- * @last_status - The last status of argument.
+ * @last_status: The status code of the last executed command.
  *
  * The function checks if the command is accessible and executable.
  * forks a new process to execute the command using execve if

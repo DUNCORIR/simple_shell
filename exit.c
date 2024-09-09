@@ -3,7 +3,7 @@
 /**
  * execute_exit - Exits the shell.
  * @args: Array of arguments, with optional exit status.
- *
+ * @last_status: The status code of the last executed command.
  * Description: The function handles "exit" command shell.
  *
  */
