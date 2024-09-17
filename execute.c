@@ -119,7 +119,7 @@ int execute_command(char **args, char **envp, char *program_name,
 	char *cmd_path;
 	int status;
 
-	if (args == NULL || args[0] == NULL)
+	if (args == NULL || args[0] == NULL || strcmp(args[0], "") == 0)
 	{
 		return (1); /* Handle empty or invalid args */
 	}
@@ -139,8 +139,12 @@ int execute_command(char **args, char **envp, char *program_name,
 		return (1);
 	}
 	cmd_path = search_path(args[0]); /* Search for the command in path */
-	if (cmd_path == NULL)
+	if (cmd_path == NULL && args[0][0] != '/')
 	{
+		if (cmd_path == NULL) /* If it's an absolute path */
+		{
+			cmd_path = args[0]; /* Use the absolute path as command */
+		}
 		/* Format error message like /bin/sh: ./hsh: 1: command: not found */
 		fprintf(stderr, "%s: %d: %s: not found\n", program_name,
 				line_number, args[0]);

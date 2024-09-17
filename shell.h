@@ -15,7 +15,7 @@ extern char **environ;
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-
+#include <errno.h>
 /* Function prototypes */
 void display_prompt(void);
 ssize_t handle_read_error(char **lineptr, ssize_t *num_read);

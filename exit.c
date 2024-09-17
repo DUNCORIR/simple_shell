@@ -15,9 +15,10 @@ void execute_exit(char **args, int last_status)
 
 	if (args[1] != NULL)
 	{
+		errno = 0;  /* Reset errno before conversion */
 		status = strtol(args[1], &endptr, 10);
 
-		if (*endptr != '\0' || args[1][0] == '-') /* Check conversion success */
+		if (*endptr != '\0' || errno != 0 || status < 0) /* Check conversion success */
 		{
 			fprintf(stderr, "./hsh: 1: exit: Illegal number: %s\n", args[1]);
 			for (i = 0; args[i] != NULL; i++)
@@ -27,10 +28,7 @@ void execute_exit(char **args, int last_status)
 			free(args);
 			exit(2);
 		}
-		else
-		{
-			status = status % 256; /*last command's status if no argument is provided */
-		}
+		status = status % 256;
 	}
 	else
 	{
