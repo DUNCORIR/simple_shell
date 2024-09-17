@@ -20,7 +20,12 @@ void execute_exit(char **args, int last_status)
 		if (*endptr != '\0' || args[1][0] == '-') /* Check conversion success */
 		{
 			fprintf(stderr, "./hsh: 1: exit: Illegal number: %s\n", args[1]);
-			status = 2;
+			for (i = 0; args[i] != NULL; i++)
+			{
+				free(args[i]);
+			}
+			free(args);
+			exit(2);
 		}
 		else
 		{

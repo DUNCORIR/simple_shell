@@ -91,7 +91,7 @@ int execute_fork(char *cmd_path, char **args, char **envp, int *last_status)
 
 		if (WIFEXITED(status))
 		{
-			*last_status = WEXITSTATUS(status); /* Return exit status child process */
+			*last_status =  WEXITSTATUS(status); /* Return exit status child process */
 		}
 	}
 	return (*last_status); /* Return 1 if there was an error */
